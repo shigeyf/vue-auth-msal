@@ -1,0 +1,26 @@
+{
+  "name": "msal-vue",
+  "version": "0.0.1",
+  "description": "Microsoft Authentication Library for Vue.js",
+  "keywords": [],
+  "author": {
+    "name": "Shige Fukushima",
+    "email": "shigeyf@outlook.com",
+    "url": "https://github.com/shigeyf/"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shigeyf/msal-vue.git"
+  },
+  "homepage": "https://github.com/shigeyf/msal-vue",
+  "bugs": {
+    "url": "https://github.com/shigeyf/msal-vue/issues"
+  },
+  "devDependencies": {
+    "@azure/msal-browser": "^2.37.0",
+    "@vue/tsconfig": "^0.4.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.2"
+  }
+}
