@@ -1,7 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "packages/masl-vue"
+    "packages/msal-vue"
   ],
   "name": "msal-vue",
   "license": "Apache-2.0",
@@ -21,14 +21,19 @@
     "prettier": "^2.8.8",
     "stylelint": "^15.6.2",
     "stylelint-config-standard-scss": "^9.0.0",
-    "typescript": "^5.0.4"
+    "typescript": "~5.0.4"
   },
   "scripts": {
     "prepare": "husky install",
     "commit": "git-cz",
     "format:lint-staged": "prettier --write",
     "lint:lint-staged": "eslint --fix",
-    "stylelint:lint-staged": "stylelint --fix"
+    "stylelint:lint-staged": "stylelint --fix",
+    "format:check": "prettier --check **/*.{json,yaml,yml,html,md,sass,scss,css,js,jsx,ts,tsx,vue}",
+    "lint:check": "eslint **/*.{js,jsx,ts,tsx,vue}",
+    "stylelint:check": "stylelint **/*.{css,sass,scss}",
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces"
   },
   "config": {
     "commitizen": {
