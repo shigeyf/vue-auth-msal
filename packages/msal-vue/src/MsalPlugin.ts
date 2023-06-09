@@ -2,6 +2,7 @@
 
 // Plugin Modules
 import type { MsalPluginOptions, AuthTokens } from './types'
+import type { VuePlugin } from './types/VuePlugin'
 import { registerRouterGuard } from './router/RouterGuard'
 import { AuthNavigationClient } from './router/AuthNavigationClient'
 import { loggerInstance, Logger, LogLevel } from './utils/Logger'
@@ -28,7 +29,7 @@ export async function createMsal(msalConfig: Configuration): Promise<MsalPlugin>
  * Class MsalPlugin
  * @public
  */
-export class MsalPlugin {
+export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
   // Plugin Contexts
   instance: PublicClientApplication
   interactionType: InteractionType
