@@ -2,7 +2,7 @@
 
 // Plugin Modules
 import type { MsalContext } from '../types'
-import { MsalPlugin } from '../plugin'
+import { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
 // External Modules
 import { getCurrentInstance, toRefs } from 'vue'

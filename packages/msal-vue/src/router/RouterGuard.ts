@@ -2,7 +2,7 @@
 
 import { inject } from 'vue'
 import type { RouteLocationNormalized, Router } from 'vue-router'
-import type { MsalPlugin } from '../plugin'
+import type { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
 import { InteractionType, PublicClientApplication, type PopupRequest, type RedirectRequest } from '@azure/msal-browser'
 
