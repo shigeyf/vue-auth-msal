@@ -44,6 +44,7 @@ const config = {
         order: ['script', 'template', 'style'],
       },
     ],
+    'vue/multi-word-component-names': 'off',
     // Recommended rules when usaging with Prettier
     'arrow-body-style': 'off',
     'prefer-arrow-callback': 'off',
