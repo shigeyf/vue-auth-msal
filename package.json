@@ -1,6 +1,9 @@
 {
+  "private": true,
+  "workspaces": [
+    "packages/masl-vue"
+  ],
   "name": "msal-vue",
-  "version": "0.0.1",
   "license": "Apache-2.0",
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
