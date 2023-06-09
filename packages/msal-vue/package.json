@@ -1,8 +1,30 @@
 {
   "name": "msal-vue",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Microsoft Authentication Library for Vue.js",
-  "keywords": [],
+  "keywords": [
+    "vue",
+    "plugin",
+    "auth",
+    "authentication",
+    "authorization",
+    "openid",
+    "oauth2",
+    "identity",
+    "social",
+    "token",
+    "azure",
+    "active",
+    "directory",
+    "aad",
+    "b2c",
+    "aadb2c",
+    "composition",
+    "api",
+    "setup",
+    "typescript",
+    "ts"
+  ],
   "author": {
     "name": "Shige Fukushima",
     "email": "shigeyf@outlook.com",
@@ -17,9 +39,54 @@
   "bugs": {
     "url": "https://github.com/shigeyf/msal-vue/issues"
   },
+  "main": "index.js",
+  "module": "./dist/msal-vue.mjs",
+  "types": "./dist/msal-vue.d.ts",
+  "typings": "./dist/msal-vue.d.ts",
+  "unpkg": "./dist/msal-vue.global.min.js",
+  "jsdelivr": "./dist/msal-vue.global.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/msal-vue.d.ts",
+      "node": {
+        "import": {
+          "production": "./dist/msal-vue.min.mjs",
+          "development": "./dist/msal-vue.mjs",
+          "default": "./dist/msal-vue.mjs"
+        },
+        "require": {
+          "production": "./dist/msal-vue.min.cjs",
+          "development": "./dist/msal-vue.cjs",
+          "default": "./index.js"
+        }
+      },
+      "import": "./dist/msal-vue.mjs",
+      "require": "./index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "scripts": {
+    "build": "run-s clean build:rollup build:dts",
+    "build:rollup": "cross-env NODE_NO_WARNINGS=1 rollup -c ./rollup.config.mjs",
+    "build:dts": "tsc -p ./tsconfig.dts.json && api-extractor run --verbose && rimraf dist/src",
+    "clean": "rimraf dist .rollup.cache"
+  },
   "devDependencies": {
     "@azure/msal-browser": "^2.37.0",
+    "@microsoft/api-extractor": "^7.35.2",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@rollup/plugin-typescript": "^11.1.1",
     "@vue/tsconfig": "^0.4.0",
+    "cross-env": "^7.0.3",
+    "npm-run-all": "^4.1.5",
+    "pascalcase": "^2.0.0",
+    "rimraf": "^5.0.1",
+    "rollup": "^3.24.0",
+    "typescript": "~5.0.4",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2"
   }
