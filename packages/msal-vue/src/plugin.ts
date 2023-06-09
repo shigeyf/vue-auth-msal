@@ -196,7 +196,7 @@ export class MsalPlugin {
         if (tokenResponse != null) {
           this._logger.info(`MSAL.js:handleRedirectPromise():then:TokenResponse = ${JSON.stringify(tokenResponse)}`)
         } else {
-          this._logger.info(`MASL.js:handleRedirectPromise():then:No Token Response`)
+          this._logger.info(`MSAL.js:handleRedirectPromise():then:No Token Response`)
         }
       })
       .catch((error) => {

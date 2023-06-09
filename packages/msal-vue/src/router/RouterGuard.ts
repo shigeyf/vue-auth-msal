@@ -33,7 +33,7 @@ export function registerRouterGuard(router: Router) {
         }
         result = await isAuthenticated(msal.instance, msal.interactionType, request)
       } else {
-        loggerInstance.info(`vue-router:beforeEach():No MaslPluginContext found then Blocked`)
+        loggerInstance.info(`vue-router:beforeEach():No MsalPluginContext found then Blocked`)
         result = false
       }
     }
