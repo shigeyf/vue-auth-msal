@@ -7,7 +7,7 @@ import { AuthNavigationClient } from './router/AuthNavigationClient'
 import { loggerInstance, Logger, LogLevel } from './utils/Logger'
 import { accountArraysAreEqual, extractTokens } from './utils/utilFuncs'
 // External Modules
-import { type App, type Plugin, reactive } from 'vue'
+import { type App, reactive } from 'vue'
 import { InteractionType, type Configuration } from '@azure/msal-browser'
 import { type AccountInfo, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
 import { type PopupRequest, type RedirectRequest, type SilentRequest } from '@azure/msal-browser'
@@ -18,7 +18,7 @@ import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventT
  * Creates a Msal plugin instance to be used by the application
  * @public
  */
-export async function createMsal(msalConfig: Configuration): Promise<Plugin<MsalPluginOptions>> {
+export async function createMsal(msalConfig: Configuration): Promise<MsalPlugin> {
   const msalInstance = new MsalPlugin(msalConfig)
   await msalInstance.initialize()
   return msalInstance
