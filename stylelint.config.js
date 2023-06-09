@@ -12,8 +12,6 @@
 /** @type {import("stylelint").Config} */
 const config = {
   extends: 'stylelint-config-standard-scss',
-  rules: {
-    'order/properties-alphabetical-order': true,
-  },
+  rules: {},
 }
 module.exports = config
