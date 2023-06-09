@@ -1,0 +1,29 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["src/global.d.ts", "src/**/*.ts", "__tests__/**/*.ts"],
+  "compilerOptions": {
+    // Project
+    "rootDir": ".",
+    "outDir": "dist",
+    "module": "ESNext", //        /Same with Extends config
+    "target": "ESNext", //        /Same with Extends config
+    "noEmit": true, //            /Default = false
+    "composite": true, //         /Default = true
+    "allowJs": false, //          /Default = false
+    "removeComments": false, //   /Default = false
+    // Strict
+    "strict": true, //            /Default = false
+    "noImplicitAny": true, //     /Default = false
+    "noImplicitThis": true, //    /Default = false
+    "strictNullChecks": true, //  /Default = false
+    // Module Resolution
+    "baseUrl": ".",
+    // Linter Checks
+    "noImplicitReturns": true, // /Default = false
+    "noUnusedLocals": true, //    /Default = false
+    // Experimental
+    "experimentalDecorators": true
+    // Advanced
+    //"declarationDir": "types",
+  }
+}
