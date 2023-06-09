@@ -11,6 +11,7 @@ type AccountIdentifiers = Partial<Pick<AccountInfo, 'homeAccountId' | 'localAcco
  * @param arrayA
  * @param arrayB
  * @returns boolean
+ * @internal
  */
 export function accountArraysAreEqual(arrayA: Array<AccountIdentifiers>, arrayB: Array<AccountIdentifiers>): boolean {
   if (arrayA.length !== arrayB.length) {
@@ -37,6 +38,7 @@ export function accountArraysAreEqual(arrayA: Array<AccountIdentifiers>, arrayB:
  * Extract authenticated tokens (idToken and accessToken) from AuthenticationResult
  * @param result
  * @returns AuthTokens
+ * @internal
  */
 export function extractTokens(result: AuthenticationResult): AuthTokens {
   let idToken = ''

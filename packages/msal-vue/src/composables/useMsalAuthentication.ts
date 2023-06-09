@@ -9,6 +9,11 @@ import { ref } from 'vue'
 import { BrowserAuthErrorMessage, InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { AuthenticationResult, AuthError, PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
+/**
+ * Function useMsalAuthentication
+ * @returns
+ * @public
+ */
 export async function useMsalAuthentication(): Promise<MsalAuthResult> {
   const { instance, interactionType, loginRequest, inProgress } = useMsal()
 

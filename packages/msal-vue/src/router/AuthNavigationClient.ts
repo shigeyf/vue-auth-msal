@@ -7,7 +7,9 @@ import { NavigationClient, type NavigationOptions } from '@azure/msal-browser'
 import { type Router } from 'vue-router'
 
 /**
+ * Class: AuthNavigationClient
  * Overriding the default NavigationClient which MSAL uses to navigate to other urls in your webpage.
+ * @internal
  */
 export class AuthNavigationClient extends NavigationClient {
   private router: Router

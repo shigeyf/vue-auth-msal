@@ -9,6 +9,11 @@ import { getCurrentInstance, toRefs } from 'vue'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
+/**
+ * Function useMsal
+ * @returns
+ * @public
+ */
 export function useMsal(): MsalContext {
   const internalInstance = getCurrentInstance()
   if (!internalInstance) {

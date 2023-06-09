@@ -1,11 +1,16 @@
 // packages/msal-vue/src/router/RouterGuard.ts
 
 import { inject } from 'vue'
-import { type RouteLocationNormalized, type Router } from 'vue-router'
-import { MsalPlugin } from '../plugin'
+import type { RouteLocationNormalized, Router } from 'vue-router'
+import type { MsalPlugin } from '../plugin'
 import { loggerInstance } from '../utils/Logger'
 import { InteractionType, PublicClientApplication, type PopupRequest, type RedirectRequest } from '@azure/msal-browser'
 
+/**
+ * Function registerRouterGuard
+ * @param router
+ * @internal
+ */
 export function registerRouterGuard(router: Router) {
   // beforeEach
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -43,7 +48,14 @@ export function registerRouterGuard(router: Router) {
   })
 }
 
-export async function isAuthenticated(
+/**
+ *
+ * @param instance
+ * @param interactionType
+ * @param loginRequest
+ * @returns
+ */
+async function isAuthenticated(
   instance: PublicClientApplication,
   interactionType: InteractionType,
   loginRequest: PopupRequest | RedirectRequest,

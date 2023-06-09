@@ -14,7 +14,19 @@ import { type PopupRequest, type RedirectRequest, type SilentRequest } from '@az
 import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventType } from '@azure/msal-browser'
 
 /**
+ * Function createMsal
+ * Creates a Msal plugin instance to be used by the application
+ * @public
+ */
+export async function createMsal(msalConfig: Configuration): Promise<Plugin<MsalPluginOptions>> {
+  const msalInstance = new MsalPlugin(msalConfig)
+  await msalInstance.initialize()
+  return msalInstance
+}
+
+/**
  * Class MsalPlugin
+ * @public
  */
 export class MsalPlugin {
   // Plugin Contexts
@@ -44,8 +56,8 @@ export class MsalPlugin {
     await this.instance.initialize()
   }
 
-  setLoglevel() {
-    this._logger.setLogLevel(LogLevel.Trace)
+  setLoglevel(logLevel: LogLevel) {
+    this._logger.setLogLevel(logLevel)
   }
 
   install(app: App, options: MsalPluginOptions) {
@@ -215,13 +227,4 @@ export class MsalPlugin {
 
     this._logger.debug('MsalPlugin:install():Returned')
   }
-}
-
-/**
- * Creates a Msal plugin instance to be used by the application
- */
-export async function createMsal(msalConfig: Configuration): Promise<Plugin<MsalPluginOptions>> {
-  const msalInstance = new MsalPlugin(msalConfig)
-  await msalInstance.initialize()
-  return msalInstance
 }

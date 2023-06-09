@@ -1,4 +1,8 @@
 // packages/msal-vue/src/packageMetadata.ts
 
-export const name = 'msal-vue'
-export const version = '0.0.1'
+/** @public */
+export const pkgName = '__pkgName__'
+/** @public */
+export const pkgVersion = '__pkgVersion__'
+/** @public */
+export const pkgBuildDate = '__pkgBuildDate__'

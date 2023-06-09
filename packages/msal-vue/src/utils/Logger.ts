@@ -2,6 +2,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+/**
+ * Enum LogLevel
+ * @public
+ */
 export enum LogLevel {
   Error,
   Warn,
@@ -10,6 +14,10 @@ export enum LogLevel {
   Trace,
 }
 
+/**
+ * Class Logger
+ * @internal
+ */
 export class Logger {
   private static _instance: Logger
 
@@ -78,4 +86,8 @@ export class Logger {
   }
 }
 
+/**
+ * Constant loggerInstance
+ * @public
+ */
 export const loggerInstance = Logger.Instance()
