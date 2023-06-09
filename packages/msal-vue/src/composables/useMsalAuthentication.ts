@@ -1,5 +1,7 @@
 // packages/msal-vue/src/composables/useMsalAuthentication.ts
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Plugin Modules
 import { useMsal } from './useMsal'
 import type { MsalAuthResult } from '../types'
@@ -63,7 +65,6 @@ export async function useMsalAuthentication(): Promise<MsalAuthResult> {
           result.value = response
           error.value = null
         } catch (e: any) {
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           loggerInstance.debug(
             `useMsalAuthentication.acquireToken():Thrown error by acquireTokenSilent(): error = ${JSON.stringify(e)}`,
           )
