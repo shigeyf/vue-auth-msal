@@ -1,2 +1,3 @@
+/.gitignore
 lib/msal-browser
 lib/msal-common
