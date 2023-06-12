@@ -5,7 +5,9 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pkg from './package.json' assert { type: 'json' }
-import typescript from '@rollup/plugin-typescript'
+//import typescript from '@rollup/plugin-typescript'
+// Use this plugin for SouceMap relative folder bug (?!) in @rollup/plugin-typescript
+import typescript from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import replace from '@rollup/plugin-replace'
@@ -23,7 +25,7 @@ const tsConfig = "./tsconfig.json"
 const outputDir = "./dist/"
 const banner = `/*!\n * ${pkg.name} v${pkg.version}\n * (c) ${new Date().getFullYear()} ${getAuthors(pkg)}\n * @license ${pkg.license}\n */`
 const external = ['@azure/msal-common', '@azure/msal-browser', ...VueExternal]
-const outputGlobals = Object.assign({'@azure/msal-browser': 'msalBrowser'}, VueGlobalsObjects)
+const outputGlobals = Object.assign({ '@azure/msal-browser': 'msalBrowser' }, VueGlobalsObjects)
 const baseConfig = {
   // core input options
   input: 'src/index.ts',
@@ -149,7 +151,11 @@ function buildRollupConfig(base, input, variant = {}, plugins = []) {
   // Update input section
   out.external = external
   out.plugins = [
-    typescript({ tsconfig: path.resolve(__dirname, tsConfig), compilerOptions: { sourceMap: sourceMap, composite: false, incremental: false } }),
+    //typescript({ tsconfig: path.resolve(__dirname, tsConfig), compilerOptions: { sourceMap: sourceMap, composite: false, incremental: false } }),
+    typescript({
+      tsconfig: path.resolve(__dirname, tsConfig),
+      tsconfigOverride: { compilerOptions: { sourceMap: sourceMap, composite: false, incremental: false } }
+    }),
     resolve(),
     commonjs(),
     ...pluginReplace(true, replacementOption),
