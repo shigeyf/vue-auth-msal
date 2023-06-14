@@ -5,7 +5,7 @@ import type { RouteLocationNormalized, Router } from 'vue-router'
 import type { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
 import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
-import type { PopupRequest, RedirectRequest } from '@azure/msal-browser'
+import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
 /**
  * Function registerRouterGuard
@@ -69,7 +69,7 @@ export function registerRouterGuard(router: Router, msal: UnwrapNestedRefs<MsalP
 async function isAuthenticated(
   instance: PublicClientApplication,
   interactionType: InteractionType,
-  loginRequest: PopupRequest | RedirectRequest,
+  loginRequest: PopupRequest | RedirectRequest | SilentRequest,
 ): Promise<boolean> {
   // If your application uses redirects for interaction,
   // handleRedirectPromise must be called and awaited on each page load before determining if a user is signed in or not
