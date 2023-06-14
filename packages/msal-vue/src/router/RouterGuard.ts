@@ -1,6 +1,5 @@
 // packages/msal-vue/src/router/RouterGuard.ts
 
-import { type UnwrapNestedRefs } from 'vue'
 import type { RouteLocationNormalized, Router } from 'vue-router'
 import type { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
@@ -12,7 +11,7 @@ import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-b
  * @param router
  * @internal
  */
-export function registerRouterGuard(router: Router, msal: UnwrapNestedRefs<MsalPlugin>) {
+export function registerRouterGuard(router: Router, msal: MsalPlugin) {
   // beforeEach
   /* eslint-disable @typescript-eslint/no-unused-vars */
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
@@ -51,7 +50,7 @@ export function registerRouterGuard(router: Router, msal: UnwrapNestedRefs<MsalP
         ...msal.loginRequest,
         redirectStartPage: to.fullPath,
       }
-      result = await isAuthenticated(msal.instance as PublicClientApplication, msal.interactionType, request)
+      result = await isAuthenticated(msal.instance, msal.interactionType, request)
     }
 
     loggerInstance.debug(`vue-router:beforeEach():Returned`)
