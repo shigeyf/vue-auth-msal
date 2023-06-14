@@ -88,8 +88,8 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
 
     // Hooks for Debug
     state.instance.addEventCallback((message: EventMessage) => {
-      this._logger.info(`MSAL.js:addEventCallback():[ForDebug]:Event Message:`)
-      this._logger.info(message)
+      this._logger.debug(`MSAL.js:addEventCallback():[ForDebug]:Event Message:`)
+      this._logger.debug(message)
     })
 
     // Hooks for after LoginSuccess
@@ -207,9 +207,9 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
         // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
         // If the tokenResponse === null, you are not coming back from an auth redirect.
         if (tokenResponse != null) {
-          this._logger.info(`MSAL.js:handleRedirectPromise():then:TokenResponse = ${JSON.stringify(tokenResponse)}`)
+          this._logger.debug(`MSAL.js:handleRedirectPromise():then:TokenResponse = ${JSON.stringify(tokenResponse)}`)
         } else {
-          this._logger.info(`MSAL.js:handleRedirectPromise():then:No Token Response`)
+          this._logger.debug(`MSAL.js:handleRedirectPromise():then:No Token Response`)
         }
       })
       .catch((error) => {
