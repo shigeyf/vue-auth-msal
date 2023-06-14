@@ -8,6 +8,7 @@ import { loggerInstance } from '../utils/Logger'
 import { getCurrentInstance, toRefs } from 'vue'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
+import type { EndSessionPopupRequest, EndSessionRequest } from '@azure/msal-browser'
 
 /**
  * Function useMsal
@@ -29,14 +30,17 @@ export function useMsal(): MsalContext {
   }
 
   // Login
-  const login = () => {
+  const login = (loginRequestOverride?: PopupRequest | RedirectRequest | SilentRequest) => {
     if (inProgress.value === InteractionStatus.None) {
       loggerInstance.debug(`useMsal.login():Called`)
 
+      const request = loginRequestOverride != undefined ? loginRequestOverride : loginRequest.value
       if (interactionType.value === InteractionType.Popup) {
-        instance.value.loginPopup(loginRequest.value)
+        loggerInstance.debug(`useMsal.login():loginPopup() with ${JSON.stringify(request)}`)
+        instance.value.loginPopup(request)
       } else if (interactionType.value == InteractionType.Redirect) {
-        instance.value.loginRedirect(loginRequest.value)
+        loggerInstance.debug(`useMsal.login():loginRedirect() with ${JSON.stringify(request)}`)
+        instance.value.loginRedirect(request)
       }
 
       loggerInstance.debug(`useMsal.login():Returned`)
@@ -46,14 +50,25 @@ export function useMsal(): MsalContext {
   }
 
   // Logout
-  const logout = () => {
+  const logout = (logoutRequestOverrides?: EndSessionPopupRequest | EndSessionRequest) => {
     if (inProgress.value === InteractionStatus.None) {
       loggerInstance.debug(`useMsal.logout():Called`)
 
+      const requestAccount = { account: instance.value.getActiveAccount() }
       if (interactionType.value === InteractionType.Popup) {
-        instance.value.logoutPopup()
+        const request =
+          logoutRequestOverrides != undefined
+            ? logoutRequestOverrides
+            : {
+                mainWindowRedirectUri: '/',
+                ...requestAccount,
+              }
+        loggerInstance.debug(`useMsal.logout():logoutPopup() with ${JSON.stringify(request)}`)
+        instance.value.logoutPopup(request)
       } else if (interactionType.value == InteractionType.Redirect) {
-        instance.value.logoutRedirect()
+        const request = logoutRequestOverrides != undefined ? logoutRequestOverrides : requestAccount
+        loggerInstance.debug(`useMsal.logout():logoutRedirect() with ${JSON.stringify(request)}`)
+        instance.value.logoutRedirect(request)
       }
 
       loggerInstance.debug(`useMsal.logout():Returned`)
