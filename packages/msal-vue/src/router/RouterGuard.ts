@@ -20,6 +20,11 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
     loggerInstance.debug(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
     loggerInstance.debug(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
 
+    // Block router navigation (and rendering) before masl initialization finished
+    loggerInstance.debug(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
+    await msal.waitInitPromise
+    loggerInstance.debug(`vue-router:beforeEach():Finished MsalPlugin Init`)
+
     // true: allow the cuurent navigation.
     // false: cancel the current navigation.
     // If the browser URL was changed (either manually by the user or via back button),

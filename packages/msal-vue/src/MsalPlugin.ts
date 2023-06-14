@@ -20,7 +20,6 @@ import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventT
  */
 export async function createMsal(msalOptions: MsalCreateOptions): Promise<MsalPlugin> {
   const msalInstance = new MsalPlugin(msalOptions)
-  await msalInstance.initialize()
   return msalInstance
 }
 
@@ -39,6 +38,10 @@ export class MsalPlugin {
 
   private _logger: Logger
 
+  // Instance Initialization Awaiter
+  private _initResolver: ((value: void | PromiseLike<void>) => void) | null
+  waitInitPromise: Promise<void>
+
   constructor(msalOptions: MsalCreateOptions) {
     this._logger = loggerInstance
     this.instance = new PublicClientApplication(msalOptions.configuration)
@@ -51,25 +54,26 @@ export class MsalPlugin {
       this.loginRequest = msalOptions.loginRequest
     }
     // Initialized values for state
-    this.inProgress = InteractionStatus.Startup
+    this.inProgress = InteractionStatus.None
     this.accounts = []
     this.tokens = {
       idToken: '',
       accessTokens: [],
     }
-  }
-
-  async initialize() {
-    await this.instance.initialize()
+    // Reset Instance Initialization Awaiter
+    this._initResolver = null
+    this.waitInitPromise = Promise.resolve()
   }
 
   setLoglevel(logLevel: LogLevel) {
     this._logger.setLogLevel(logLevel)
   }
 
-  install(app: App, options: MsalPluginOptions) {
+  // Asynchronous install()
+  async install(app: App, options: MsalPluginOptions) {
     this._logger.debug('MsalPlugin:install():Called')
 
+    // When vuejs/router is introduced
     if (options.router != undefined) {
       // Set NavigationClient
       const navigationClient = new AuthNavigationClient(options.router)
@@ -78,6 +82,7 @@ export class MsalPlugin {
       registerRouterGuard(options.router, this)
     }
 
+    this._logger.debug('MsalPlugin:install:Initialize state')
     // Initialize with current MSAL.js accounts
     this.accounts = this.instance.getAllAccounts()
     const state = reactive<MsalPlugin>(this)
@@ -87,7 +92,7 @@ export class MsalPlugin {
     //
     // Configure MSAL.js hooks
     //
-
+    this._logger.debug('MsalPlugin:install:Initialize Event Callback Hooks')
     // Hooks for Debug
     state.instance.addEventCallback((message: EventMessage) => {
       this._logger.debug(`MSAL.js:addEventCallback():[ForDebug]:Event Message:`)
@@ -201,28 +206,53 @@ export class MsalPlugin {
       }
     })
 
-    // MSAL.js handleRedirectPromise
-    state.instance
-      .handleRedirectPromise()
-      .then((tokenResponse) => {
-        // Check if the tokenResponse is null
-        // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
-        // If the tokenResponse === null, you are not coming back from an auth redirect.
-        if (tokenResponse != null) {
-          this._logger.debug(`MSAL.js:handleRedirectPromise():then:TokenResponse = ${JSON.stringify(tokenResponse)}`)
-        } else {
-          this._logger.debug(`MSAL.js:handleRedirectPromise():then:No Token Response`)
-        }
-      })
-      .catch((error) => {
-        // Handle errors (either in the library or coming back from the server)
-        // Errors should be handled by listening to the LOGIN_FAILURE event
-        this._logger.error(`MSAL.js:handleRedirectPromise():catch:${error}`)
-      })
-      .finally(() => {
-        // Logics for finally block
-      })
+    // MSAL Instance Initialization
+    this.waitInit()
+    await this.instance.initialize().then(() => {
+      // Added handleRedirectPromise Hook for Redirect flow
+      this._logger.debug(`MsalPlugin:install:instance.initialize() finished`)
+      state.instance
+        .handleRedirectPromise()
+        .then((tokenResponse) => {
+          this._logger.debug(`MsalPlugin:install:handleRedirectPromise:then:Called`)
+          // Reset InteractionStatus after handleRedirectPromise resolved
+          state.inProgress = InteractionStatus.None
+          // Check if the tokenResponse is null
+          // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
+          // If the tokenResponse === null, you are not coming back from an auth redirect.
+          if (tokenResponse != null) {
+            this._logger.debug(
+              `MsalPlugin:install:handleRedirectPromise:then:TokenResponse = ${JSON.stringify(tokenResponse)}`,
+            )
+          } else {
+            this._logger.debug(`MsalPlugin:install:handleRedirectPromise:then:No Token Response`)
+          }
+        })
+        .catch((error) => {
+          // Handle errors (either in the library or coming back from the server)
+          // Errors should be handled by listening to the LOGIN_FAILURE event
+          this._logger.error(`MsalPlugin:install:handleRedirectPromise:catch:${error}`)
+        })
+        .finally(() => {
+          // Logics for finally block
+        })
+    })
+    this.doneInit()
 
     this._logger.debug('MsalPlugin:install():Returned')
+  }
+
+  private waitInit() {
+    if (this._initResolver == null) {
+      this.waitInitPromise = new Promise((resolve) => (this._initResolver = resolve))
+    }
+  }
+
+  private doneInit() {
+    if (this._initResolver != null) {
+      this._initResolver()
+      this._initResolver = null
+      this.waitInitPromise = Promise.resolve()
+    }
   }
 }
