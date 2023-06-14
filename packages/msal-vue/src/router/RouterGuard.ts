@@ -1,17 +1,18 @@
 // packages/msal-vue/src/router/RouterGuard.ts
 
-import { inject } from 'vue'
+import { type UnwrapNestedRefs } from 'vue'
 import type { RouteLocationNormalized, Router } from 'vue-router'
 import type { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
-import { InteractionType, PublicClientApplication, type PopupRequest, type RedirectRequest } from '@azure/msal-browser'
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser'
+import type { PopupRequest, RedirectRequest } from '@azure/msal-browser'
 
 /**
  * Function registerRouterGuard
  * @param router
  * @internal
  */
-export function registerRouterGuard(router: Router) {
+export function registerRouterGuard(router: Router, msal: UnwrapNestedRefs<MsalPlugin>) {
   // beforeEach
   /* eslint-disable @typescript-eslint/no-unused-vars */
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
@@ -26,21 +27,16 @@ export function registerRouterGuard(router: Router) {
     // it will be reset to that of the from route.
     let result = true
 
+    // All matched routes (self and its parents) are populated into `matched` property as an array
+    // Check if one of the mateched routes has meta:requiresAuth property
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-      loggerInstance.debug(`vue-router:beforeEach():Invoke RouterGuard because of 'requiresAuth' = true`)
-      const msal: MsalPlugin | undefined = inject<MsalPlugin>('$msal')
-      if (msal) {
-        loggerInstance.info(`vue-router:beforeEach():MSAL Plugin Context = `)
-        loggerInstance.info(msal)
-        const request = {
-          ...msal.loginRequest,
-          redirectStartPage: to.fullPath,
-        }
-        result = await isAuthenticated(msal.instance, msal.interactionType, request)
-      } else {
-        loggerInstance.info(`vue-router:beforeEach():No MsalPluginContext found then Blocked`)
-        result = false
+      loggerInstance.debug(`vue-router:beforeEach():Invoke RouterGuard for MsalPlugin because of 'requiresAuth' = true`)
+
+      const request = {
+        ...msal.loginRequest,
+        redirectStartPage: to.fullPath,
       }
+      result = await isAuthenticated(msal.instance as PublicClientApplication, msal.interactionType, request)
     }
 
     loggerInstance.debug(`vue-router:beforeEach():Returned`)

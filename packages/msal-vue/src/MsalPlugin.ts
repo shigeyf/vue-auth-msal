@@ -78,7 +78,7 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
       this.interactionType = options.interactionType
     }
     this.accounts = this.instance.getAllAccounts()
-    const state = reactive(this)
+    const state = reactive<MsalPlugin>(this)
     app.config.globalProperties.$msal = state
     app.provide('$msal', state)
 
@@ -223,7 +223,7 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
 
     // Configure Router Guard
     if (options.router) {
-      registerRouterGuard(options.router)
+      registerRouterGuard(options.router, this)
     }
 
     this._logger.debug('MsalPlugin:install():Returned')
