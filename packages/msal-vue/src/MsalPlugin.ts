@@ -1,17 +1,16 @@
 // packages/msal-vue/src/plugin.ts
 
 // Plugin Modules
-import type { MsalPluginOptions, AuthTokens } from './types'
-import type { VuePlugin } from './types/VuePlugin'
+import type { MsalCreateOptions, MsalPluginOptions, AuthTokens } from './types'
 import { registerRouterGuard } from './router/RouterGuard'
 import { AuthNavigationClient } from './router/AuthNavigationClient'
 import { loggerInstance, Logger, LogLevel } from './utils/Logger'
 import { accountArraysAreEqual, extractTokens } from './utils/utilFuncs'
 // External Modules
-import { type App, reactive } from 'vue'
-import { InteractionType, type Configuration } from '@azure/msal-browser'
-import { type AccountInfo, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
-import { type PopupRequest, type RedirectRequest, type SilentRequest } from '@azure/msal-browser'
+import type { App } from 'vue'
+import { reactive } from 'vue'
+import { InteractionStatus, InteractionType, PublicClientApplication } from '@azure/msal-browser'
+import type { AccountInfo, PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventType } from '@azure/msal-browser'
 
 /**
@@ -19,8 +18,8 @@ import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventT
  * Creates a Msal plugin instance to be used by the application
  * @public
  */
-export async function createMsal(msalConfig: Configuration): Promise<MsalPlugin> {
-  const msalInstance = new MsalPlugin(msalConfig)
+export async function createMsal(msalOptions: MsalCreateOptions): Promise<MsalPlugin> {
+  const msalInstance = new MsalPlugin(msalOptions)
   await msalInstance.initialize()
   return msalInstance
 }
@@ -29,7 +28,7 @@ export async function createMsal(msalConfig: Configuration): Promise<MsalPlugin>
  * Class MsalPlugin
  * @public
  */
-export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
+export class MsalPlugin {
   // Plugin Contexts
   instance: PublicClientApplication
   interactionType: InteractionType
@@ -40,11 +39,18 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
 
   private _logger: Logger
 
-  constructor(msalConfig: Configuration) {
+  constructor(msalOptions: MsalCreateOptions) {
     this._logger = loggerInstance
-    this.instance = new PublicClientApplication(msalConfig)
-    this.interactionType = InteractionType.Redirect
+    this.instance = new PublicClientApplication(msalOptions.configuration)
+    this.interactionType = InteractionType.Redirect // default InteractionType
     this.loginRequest = { scopes: [] } // default LoginRequest
+    if (msalOptions.interactionType) {
+      this.interactionType = msalOptions.interactionType
+    }
+    if (msalOptions.loginRequest) {
+      this.loginRequest = msalOptions.loginRequest
+    }
+    // Initialized values for state
     this.inProgress = InteractionStatus.Startup
     this.accounts = []
     this.tokens = {
@@ -64,19 +70,15 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
   install(app: App, options: MsalPluginOptions) {
     this._logger.debug('MsalPlugin:install():Called')
 
-    // Set NavigationClient
-    if (options.router) {
+    if (options.router != undefined) {
+      // Set NavigationClient
       const navigationClient = new AuthNavigationClient(options.router)
       this.instance.setNavigationClient(navigationClient)
+      // Configure Router Guard
+      registerRouterGuard(options.router, this)
     }
 
     // Initialize with current MSAL.js accounts
-    if (options.loginRequest) {
-      this.loginRequest = options.loginRequest
-    }
-    if (options.interactionType) {
-      this.interactionType = options.interactionType
-    }
     this.accounts = this.instance.getAllAccounts()
     const state = reactive<MsalPlugin>(this)
     app.config.globalProperties.$msal = state
@@ -220,11 +222,6 @@ export class MsalPlugin implements VuePlugin<MsalPluginOptions> {
       .finally(() => {
         // Logics for finally block
       })
-
-    // Configure Router Guard
-    if (options.router) {
-      registerRouterGuard(options.router, this)
-    }
 
     this._logger.debug('MsalPlugin:install():Returned')
   }

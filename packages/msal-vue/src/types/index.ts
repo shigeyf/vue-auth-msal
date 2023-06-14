@@ -3,6 +3,7 @@
 import type { Ref } from 'vue'
 import type { Router } from 'vue-router'
 import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
+import type { Configuration } from '@azure/msal-browser'
 import type { AccountInfo, AuthError, AuthenticationResult } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
@@ -11,12 +12,20 @@ import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-b
  */
 
 /**
+ * Type: MsalCreateOptions
+ * @public
+ */
+export type MsalCreateOptions = {
+  configuration: Configuration
+  interactionType?: InteractionType
+  loginRequest?: PopupRequest | RedirectRequest | SilentRequest
+}
+
+/**
  * Type: MsalPluginOptions
  * @public
  */
 export type MsalPluginOptions = {
-  interactionType?: InteractionType
-  loginRequest?: PopupRequest | RedirectRequest | SilentRequest
   router?: Router
 }
 
