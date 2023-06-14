@@ -4,7 +4,7 @@ import { type UnwrapNestedRefs } from 'vue'
 import type { RouteLocationNormalized, Router } from 'vue-router'
 import type { MsalPlugin } from '../MsalPlugin'
 import { loggerInstance } from '../utils/Logger'
-import { InteractionType, PublicClientApplication } from '@azure/msal-browser'
+import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest } from '@azure/msal-browser'
 
 /**
@@ -18,14 +18,29 @@ export function registerRouterGuard(router: Router, msal: UnwrapNestedRefs<MsalP
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     loggerInstance.debug(`vue-router:beforeEach():Called`)
 
-    //loggerInstance.info(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
-    //loggerInstance.info(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
+    loggerInstance.debug(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
+    loggerInstance.debug(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
 
     // true: allow the cuurent navigation.
     // false: cancel the current navigation.
     // If the browser URL was changed (either manually by the user or via back button),
     // it will be reset to that of the from route.
     let result = true
+
+    loggerInstance.debug(`vue-router:beforeEach():MsalPlugin = `)
+    loggerInstance.debug(msal)
+
+    // Remove auth response hash from app URL when redirecting back to this app from AAD Auth.
+    if (msal.inProgress === InteractionStatus.HandleRedirect) {
+      // URL components in `hash` property are not encoded, while those in fullPath are encoded;
+      // you cannot simply do String.replace() with `hash` property against `fullPath` property.
+      const pathWithouHash = to.fullPath.split('#')[0]
+      to.fullPath = pathWithouHash
+      to.hash = ''
+      // `href` property contains `hash` but it's not a valid prop according to type definition
+      // You don't likely need to replace `href` for hash removement.
+      // To be clarified for future
+    }
 
     // All matched routes (self and its parents) are populated into `matched` property as an array
     // Check if one of the mateched routes has meta:requiresAuth property
