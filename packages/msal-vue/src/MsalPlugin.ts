@@ -37,6 +37,7 @@ export class MsalPlugin {
   tokens: AuthTokens
 
   private _logger: Logger
+  private _eventCallbacks: { name: string; id: string | null }[]
 
   // Instance Initialization Awaiter
   private _initResolver: ((value: void | PromiseLike<void>) => void) | null
@@ -44,6 +45,7 @@ export class MsalPlugin {
 
   constructor(msalOptions: MsalCreateOptions) {
     this._logger = loggerInstance
+    this._eventCallbacks = []
     this.instance = new PublicClientApplication(msalOptions.configuration)
     this.interactionType = InteractionType.Redirect // default InteractionType
     this.loginRequest = { scopes: [] } // default LoginRequest
@@ -93,101 +95,117 @@ export class MsalPlugin {
     // Configure MSAL.js hooks
     //
     this._logger.debug('MsalPlugin:install:Initialize Event Callback Hooks')
+    let id: string | null = null
     // Hooks for Debug
-    state.instance.addEventCallback((message: EventMessage) => {
-      this._logger.debug(`MSAL.js:addEventCallback():[ForDebug]:Event Message:`)
+    id = state.instance.addEventCallback((message: EventMessage) => {
+      this._logger.debug(`MsalPlugin:install:EventCallback:[ForDebug]:Event Message:`)
       this._logger.debug(message)
     })
+    this._eventCallbacks.push({ name: 'ForDebug', id: id })
 
     // Hooks for after LoginSuccess
-    state.instance.addEventCallback((message: EventMessage) => {
+    id = state.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.LOGIN_SUCCESS) {
-        this._logger.debug(`MSAL.js:addEventCallback():[LoginSuccess]:Called`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[LoginSuccess]:Called`)
 
         if (message.payload) {
           const payload = message.payload as AuthenticationResult
-          this._logger.info(`MSAL.js:addEventCallback():[LoginSuccess]:Payload = ${JSON.stringify(payload)}`)
+          this._logger.info(`MsalPlugin:install:EventCallback:[LoginSuccess]:Payload = ${JSON.stringify(payload)}`)
 
           // Update accounts
           const account = payload.account
           if (account != null) {
             state.instance.setActiveAccount(account)
-            this._logger.info(`MSAL.js:addEventCallback():[LoginSuccess]:Set Active Account = ${account.username}`)
+            this._logger.info(
+              `MsalPlugin:install:EventCallback:[LoginSuccess]:Set Active Account = ${account.username}`,
+            )
           }
           // Update tokens
           state.tokens = extractTokens(payload) // direct set to 'tokens' for reactivity
-          this._logger.info(`MSAL.js:addEventCallback():[LoginSuccess]:Update tokens = ${JSON.stringify(state.tokens)}`)
+          this._logger.info(
+            `MsalPlugin:install:EventCallback:[LoginSuccess]:Update tokens = ${JSON.stringify(state.tokens)}`,
+          )
         }
 
-        this._logger.debug(`MSAL.js:addEventCallback():[LoginSuccess]:Returned`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[LoginSuccess]:Returned`)
       }
     })
+    this._eventCallbacks.push({ name: 'LoginSuccess', id: id })
 
     // Hooks for after AcquireTokenSuccess
-    state.instance.addEventCallback((message: EventMessage) => {
+    id = state.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
-        this._logger.debug(`MSAL.js:addEventCallback():[AcquireTokenSuccess]:Called`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[AcquireTokenSuccess]:Called`)
 
         if (message.payload) {
           const payload = message.payload as AuthenticationResult
-          this._logger.info(`MSAL.js:addEventCallback():[AcquireTokenSuccess]:Payload = ${JSON.stringify(payload)}`)
+          this._logger.info(
+            `MsalPlugin:install:EventCallback:[AcquireTokenSuccess]:Payload = ${JSON.stringify(payload)}`,
+          )
 
           // Update tokens
           state.tokens = extractTokens(payload) // direct set to 'tokens' for reactivity
-          this._logger.info(`MSAL.js:addEventCallback():[LoginSuccess]:Update tokens = ${JSON.stringify(state.tokens)}`)
+          this._logger.info(
+            `MsalPlugin:install:EventCallback:[AcquireTokenSuccess]:Update tokens = ${JSON.stringify(state.tokens)}`,
+          )
         }
 
-        this._logger.debug(`MSAL.js:addEventCallback():[AcquireTokenSuccess]:Returned`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[AcquireTokenSuccess]:Returned`)
       }
     })
+    this._eventCallbacks.push({ name: 'AcquireTokenSuccess', id: id })
 
     // Hooks for Accounts update
-    state.instance.addEventCallback((message: EventMessage) => {
+    id = state.instance.addEventCallback((message: EventMessage) => {
       switch (message.eventType) {
         case EventType.ACCOUNT_ADDED:
         case EventType.ACCOUNT_REMOVED:
         case EventType.LOGIN_SUCCESS:
-        case EventType.SSO_SILENT_SUCCESS:
-        case EventType.HANDLE_REDIRECT_END:
         case EventType.LOGIN_FAILURE:
+        case EventType.SSO_SILENT_SUCCESS:
         case EventType.SSO_SILENT_FAILURE:
-        case EventType.LOGOUT_END:
         case EventType.ACQUIRE_TOKEN_SUCCESS:
         case EventType.ACQUIRE_TOKEN_FAILURE:
+        case EventType.HANDLE_REDIRECT_END:
+        case EventType.LOGOUT_END:
           {
-            this._logger.debug(`MSAL.js:addEventCallback():[AccountsUpdate]:Called`)
+            this._logger.debug(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Called`)
 
             const currentAccounts = this.instance.getAllAccounts()
             if (!accountArraysAreEqual(currentAccounts, state.accounts)) {
               state.accounts = currentAccounts
               this._logger.info(
-                `MSAL.js:addEventCallback():[AccountsUpdate]:Accounts Updated: ${JSON.stringify(state.accounts)}`,
+                `MsalPlugin:install:EventCallback:[AccountsUpdate]:Accounts Updated: ${JSON.stringify(state.accounts)}`,
               )
             }
 
-            this._logger.debug(`MSAL.js:addEventCallback():[AccountsUpdate]:Returned`)
+            this._logger.debug(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Returned`)
           }
           break
       }
     })
+    this._eventCallbacks.push({ name: 'AccountsUpdate', id: id })
 
     // Hooks for Status Updating
-    state.instance.addEventCallback((message: EventMessage) => {
-      this._logger.debug(`MSAL.js:addEventCallback():[StatusUpdate]:Called`)
+    id = state.instance.addEventCallback((message: EventMessage) => {
+      this._logger.debug(`MsalPlugin:install:EventCallback:[StatusUpdate]:Called`)
 
       const status = EventMessageUtils.getInteractionStatusFromEvent(message, state.inProgress)
       if (status !== null) {
         state.inProgress = status
-        this._logger.info(`MSAL.js:addEventCallback():[StatusUpdate]:Status Updated to ${status}`)
+        this._logger.info(
+          `MsalPlugin:install:EventCallback:[StatusUpdate]:Status Updated from ${state.inProgress} to ${status}`,
+        )
       }
 
-      this._logger.debug(`MSAL.js:addEventCallback():[StatusUpdate]:Returned`)
+      this._logger.debug(`MsalPlugin:install:EventCallback:[StatusUpdate]:Returned`)
     })
+    this._eventCallbacks.push({ name: 'StatusUpdate', id: id })
 
-    // Hooks for PopupLogout
-    state.instance.addEventCallback((message: EventMessage) => {
+    // Hooks for LogOutPopupEnd
+    id = state.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.LOGOUT_END && message.interactionType === InteractionType.Popup) {
-        this._logger.debug(`MSAL.js:addEventCallback():[LoginOutEnd-Popup]:Called`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Called`)
 
         const router = options.router
         if (router != undefined) {
@@ -195,16 +213,17 @@ export class MsalPlugin {
           if (currentRoute.meta.requiresAuth) {
             if (currentRoute.meta.popupLogoutFallback != undefined) {
               this._logger.info(
-                `MSAL.js:addEventCallback():[LoginOutEnd-Popup]:Route Fallback to ${currentRoute.meta.popupLogoutFallback}`,
+                `MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Route Fallback to ${currentRoute.meta.popupLogoutFallback}`,
               )
               router.push(currentRoute.meta.popupLogoutFallback)
             }
           }
         }
 
-        this._logger.debug(`MSAL.js:addEventCallback():[LoginOutEnd-Popup]:Returned`)
+        this._logger.debug(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Returned`)
       }
     })
+    this._eventCallbacks.push({ name: 'LogOutPopupEnd', id: id })
 
     // MSAL Instance Initialization
     this.waitInit()
