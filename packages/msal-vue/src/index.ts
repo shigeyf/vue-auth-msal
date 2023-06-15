@@ -1,5 +1,6 @@
 // packages/msal-vue/src/index.ts
 
+export { pkgName, pkgVersion, pkgBuildDate } from './packageMetadata'
 export type { MsalCreateOptions, MsalPluginOptions, MsalContext, MsalAuthResult } from './types'
 export type { AuthTokens, AuthAccessToken } from './types'
 export { createMsal, MsalPlugin } from './MsalPlugin'
