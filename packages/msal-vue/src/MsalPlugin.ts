@@ -18,7 +18,7 @@ import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventT
  * Creates a Msal plugin instance to be used by the application
  * @public
  */
-export async function createMsal(msalOptions: MsalCreateOptions): Promise<MsalPlugin> {
+export function createMsal(msalOptions: MsalCreateOptions): MsalPlugin {
   const msalInstance = new MsalPlugin(msalOptions)
   return msalInstance
 }
