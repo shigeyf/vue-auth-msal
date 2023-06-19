@@ -9,7 +9,7 @@ import { registerRouterGuard } from './router/RouterGuard'
 import { AuthNavigationClient } from './router/AuthNavigationClient'
 import { accountArraysAreEqual } from './utils/utilFuncs'
 // External Modules
-import type { App, UnwrapNestedRefs } from 'vue'
+import type { App, Plugin, UnwrapNestedRefs } from 'vue'
 import { reactive } from 'vue'
 import { InteractionStatus, InteractionType, PublicClientApplication } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest, WrapperSKU } from '@azure/msal-browser'
@@ -30,7 +30,7 @@ export function createMsal(msalOptions: MsalCreateOptions): MsalPlugin {
  * Class MsalPlugin
  * @public
  */
-export class MsalPlugin {
+export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<MsalPluginOptions>> {
   // Plugin Contexts
   instance: PublicClientApplication
   options: {
