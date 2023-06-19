@@ -16,24 +16,21 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
   // beforeEach
   /* eslint-disable @typescript-eslint/no-unused-vars */
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    logger.debug(`vue-router:beforeEach():Called`)
+    logger.verbose(`vue-router:beforeEach():Called`)
 
-    logger.debug(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
-    logger.debug(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
+    logger.verbose(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
+    logger.verbose(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
 
     // Block router navigation (and rendering) before masl initialization finished
-    logger.debug(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
+    logger.verbose(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
     await msal.waitInitPromise
-    logger.debug(`vue-router:beforeEach():Finished MsalPlugin Init`)
+    logger.verbose(`vue-router:beforeEach():Finished MsalPlugin Init`)
 
     // true: allow the cuurent navigation.
     // false: cancel the current navigation.
     // If the browser URL was changed (either manually by the user or via back button),
     // it will be reset to that of the from route.
     let result = true
-
-    logger.debug(`vue-router:beforeEach():MsalPlugin = `)
-    logger.debug(msal)
 
     // Remove auth response hash from app URL when redirecting back to this app from AAD Auth.
     if (msal.getCurrentInteractionStaus() === InteractionStatus.HandleRedirect) {
@@ -50,7 +47,7 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
     // All matched routes (self and its parents) are populated into `matched` property as an array
     // Check if one of the mateched routes has meta:requiresAuth property
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-      logger.debug(`vue-router:beforeEach():Invoke RouterGuard for MsalPlugin because of 'requiresAuth' = true`)
+      logger.verbose(`vue-router:beforeEach():Invoke RouterGuard for MsalPlugin because of 'requiresAuth' = true`)
 
       const request = {
         ...msal.options.loginRequest,
@@ -59,7 +56,7 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
       result = await isAuthenticated(msal.instance, msal.options.interactionType, request)
     }
 
-    logger.debug(`vue-router:beforeEach():Returned`)
+    logger.verbose(`vue-router:beforeEach():Returned`)
     return result
   })
 }

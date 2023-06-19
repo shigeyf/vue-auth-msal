@@ -1,9 +1,7 @@
 // packages/msal-vue/src/router/AuthNavigationClient.ts
 
-// Plugin Modules
-import { loggerInstance } from '../utils/Logger'
 // External Modules
-import { NavigationClient, type NavigationOptions } from '@azure/msal-browser'
+import { NavigationClient, PublicClientApplication, type NavigationOptions } from '@azure/msal-browser'
 import { type Router } from 'vue-router'
 
 /**
@@ -13,10 +11,12 @@ import { type Router } from 'vue-router'
  */
 export class AuthNavigationClient extends NavigationClient {
   private router: Router
+  private pca: PublicClientApplication
 
-  constructor(router: Router) {
+  constructor(router: Router, pca: PublicClientApplication) {
     super()
     this.router = router
+    this.pca = pca
   }
 
   /**
@@ -31,10 +31,10 @@ export class AuthNavigationClient extends NavigationClient {
    *     * When logging out via Popup interaction
    */
   async navigateInternal(url: string, options: NavigationOptions) {
-    loggerInstance.debug('AuthNavigationClient.ts:navigateInternal():Called')
+    this.pca.getLogger().verbose('AuthNavigationClient:navigateInternal():Called')
 
-    loggerInstance.debug(`url = ${url}`)
-    loggerInstance.debug(`options = ${JSON.stringify(options)}`)
+    this.pca.getLogger().verbose(`AuthNavigationClient:navigateInternal():url = ${url}`)
+    this.pca.getLogger().verbose(`AuthNavigationClient:navigateInternal():options = ${JSON.stringify(options)}`)
 
     const relativePath = url.replace(window.location.origin, '')
     if (options.noHistory) {
@@ -43,7 +43,7 @@ export class AuthNavigationClient extends NavigationClient {
       this.router.push(relativePath)
     }
 
-    loggerInstance.debug('AuthNavigationClient.ts:navigateInternal():Returned always false')
+    this.pca.getLogger().verbose('AuthNavigationClient:navigateInternal():Returned always false')
     return false
   }
 }

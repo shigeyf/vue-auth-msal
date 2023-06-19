@@ -30,7 +30,7 @@ export function useMsalAuthentication(): MsalAuthResult {
   const error = ref<AuthError | null>(null)
 
   const acquireToken = async (requestOverride?: PopupRequest | RedirectRequest | SilentRequest): Promise<void> => {
-    logger.debug(`useMsalAuthentication.acquireToken():Called`)
+    logger.verbose(`useMsalAuthentication.acquireToken():Called`)
 
     if (!isInProgress.value) {
       // Lock
@@ -38,18 +38,18 @@ export function useMsalAuthentication(): MsalAuthResult {
 
       // Process for handleRedirectPromise()
       if (inProgress.value === InteractionStatus.HandleRedirect) {
-        logger.debug(`useMsalAuthentication.acquireToken():Trigger handleRedirectPromise()`)
+        logger.verbose(`useMsalAuthentication.acquireToken():Trigger handleRedirectPromise()`)
         try {
           const response = await instance.handleRedirectPromise()
           if (response) {
-            logger.debug(
+            logger.verbose(
               `useMsalAuthentication.acquireToken():handleRedirectPromise() got response: ${JSON.stringify(response)}`,
             )
             result.value = response
             error.value = null
           }
         } catch (e) {
-          logger.debug(`useMsalAuthentication.acquireToken():handleRedirectPromise() got error: ${JSON.stringify(e)}`)
+          logger.verbose(`useMsalAuthentication.acquireToken():handleRedirectPromise() got error: ${JSON.stringify(e)}`)
           result.value = null
           error.value = e as AuthError
         }
@@ -58,7 +58,7 @@ export function useMsalAuthentication(): MsalAuthResult {
       // Process for acquireToken()
       else if (inProgress.value === InteractionStatus.None) {
         const tokenRequest = requestOverride || loginRequest
-        logger.debug(
+        logger.verbose(
           `useMsalAuthentication.acquireToken():Trigger acquireTokenSilent() with ${JSON.stringify(tokenRequest)}`,
         )
         try {
@@ -66,12 +66,12 @@ export function useMsalAuthentication(): MsalAuthResult {
           result.value = response
           error.value = null
         } catch (e: any) {
-          logger.debug(
+          logger.verbose(
             `useMsalAuthentication.acquireToken():Thrown error by acquireTokenSilent(): error = ${JSON.stringify(e)}`,
           )
           // Try Login (Popup or Redirect) when no account error
           if (e['errorCode'] === BrowserAuthErrorMessage.noAccountError.code && instance.getAllAccounts().length == 0) {
-            logger.debug(`useMsalAuthentication.acquireToken():Trigger login() with ${JSON.stringify(tokenRequest)}`)
+            logger.verbose(`useMsalAuthentication.acquireToken():Trigger login() with ${JSON.stringify(tokenRequest)}`)
             if (loginType === InteractionType.Popup) {
               await instance
                 .loginPopup(tokenRequest)
@@ -102,7 +102,7 @@ export function useMsalAuthentication(): MsalAuthResult {
       isInProgress.value = false
     }
 
-    logger.debug(`useMsalAuthentication.acquireToken():Returned`)
+    logger.verbose(`useMsalAuthentication.acquireToken():Returned`)
     return
   }
 

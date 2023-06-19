@@ -3,17 +3,18 @@
 // Plugin Modules
 import type { MsalCreateOptions, MsalPluginOptions } from './types'
 import type { MsalState } from './injectionSymbols'
+import { pkgName, pkgVersion } from './packageMetadata'
 import { msalPluginKey, msalStateKey } from './injectionSymbols'
 import { registerRouterGuard } from './router/RouterGuard'
 import { AuthNavigationClient } from './router/AuthNavigationClient'
-import { loggerInstance, Logger, LogLevel } from './utils/Logger'
 import { accountArraysAreEqual } from './utils/utilFuncs'
 // External Modules
 import type { App, UnwrapNestedRefs } from 'vue'
 import { reactive } from 'vue'
 import { InteractionStatus, InteractionType, PublicClientApplication } from '@azure/msal-browser'
-import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
+import type { PopupRequest, RedirectRequest, SilentRequest, WrapperSKU } from '@azure/msal-browser'
 import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventType } from '@azure/msal-browser'
+import type { Logger } from '@azure/msal-browser'
 
 /**
  * Function createMsal
@@ -47,9 +48,6 @@ export class MsalPlugin {
   waitInitPromise: Promise<void>
 
   constructor(msalOptions: MsalCreateOptions) {
-    this._logger = loggerInstance
-    this._eventCallbacks = []
-
     // Set default options
     this.options = {
       interactionType: InteractionType.Redirect,
@@ -74,7 +72,10 @@ export class MsalPlugin {
     this._initResolver = null
     this.waitInitPromise = Promise.resolve()
 
-    this._logger.setLogLevel(LogLevel.Trace)
+    // Initialize private properties
+    this.instance.initializeWrapperLibrary(pkgName as WrapperSKU, pkgVersion)
+    this._logger = this.instance.getLogger().clone(pkgName, pkgVersion)
+    this._eventCallbacks = []
   }
 
   getLogger(): Logger {
@@ -87,16 +88,16 @@ export class MsalPlugin {
 
   // Asynchronous install()
   async install(app: App, options: MsalPluginOptions) {
-    this._logger.debug('MsalPlugin:install():Called')
+    this._logger.verbose('MsalPlugin:install():Called')
 
     //
     // Setup Router Extensions
     //   When vuejs/router is introduced
     //
     if (options.router != undefined) {
-      this._logger.debug('MsalPlugin:install:Initialize Router extension')
+      this._logger.verbose('MsalPlugin:install:Initialize Router extension')
       // Set NavigationClient
-      const navigationClient = new AuthNavigationClient(options.router)
+      const navigationClient = new AuthNavigationClient(options.router, this.instance)
       this.instance.setNavigationClient(navigationClient)
       // Configure Router Guard
       registerRouterGuard(options.router, this)
@@ -105,7 +106,7 @@ export class MsalPlugin {
     //
     // Setup Plugin Contexts
     //
-    this._logger.debug('MsalPlugin:install:Initialize MsalState')
+    this._logger.verbose('MsalPlugin:install:Initialize MsalState')
     app.provide(msalPluginKey, this)
     app.provide(msalStateKey, this._state)
 
@@ -115,19 +116,18 @@ export class MsalPlugin {
     //   2. Initialize Instance
     //   3. Setup HandleRedirect hook
     //
-    this._logger.debug('MsalPlugin:install:Initialize Event Callback Hooks')
+    this._logger.verbose('MsalPlugin:install:Initialize Event Callback Hooks')
     let id: string | null = null
     // Hooks for Debug
     id = this.instance.addEventCallback((message: EventMessage) => {
-      this._logger.debug(`MsalPlugin:install:EventCallback:[ForDebug]:Event Message:`)
-      this._logger.debug(message)
+      this._logger.verbose(`MsalPlugin:install:EventCallback:[ForDebug]:Event Message: ${message.eventType}`)
     })
     this._eventCallbacks.push({ name: 'ForDebug', id: id })
 
     // Hooks for after LoginSuccess
     id = this.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.LOGIN_SUCCESS) {
-        this._logger.debug(`MsalPlugin:install:EventCallback:[LoginSuccess]:Called`)
+        this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Called`)
 
         if (message.payload) {
           const payload = message.payload as AuthenticationResult
@@ -143,7 +143,7 @@ export class MsalPlugin {
           }
         }
 
-        this._logger.debug(`MsalPlugin:install:EventCallback:[LoginSuccess]:Returned`)
+        this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Returned`)
       }
     })
     this._eventCallbacks.push({ name: 'LoginSuccess', id: id })
@@ -162,7 +162,7 @@ export class MsalPlugin {
         case EventType.HANDLE_REDIRECT_END:
         case EventType.LOGOUT_END:
           {
-            this._logger.debug(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Called`)
+            this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Called`)
 
             const currentAccounts = this.instance.getAllAccounts()
             if (!accountArraysAreEqual(currentAccounts, this._state.accounts)) {
@@ -174,7 +174,7 @@ export class MsalPlugin {
               )
             }
 
-            this._logger.debug(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Returned`)
+            this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Returned`)
           }
           break
       }
@@ -183,7 +183,7 @@ export class MsalPlugin {
 
     // Hooks for Status Updating
     id = this.instance.addEventCallback((message: EventMessage) => {
-      this._logger.debug(`MsalPlugin:install:EventCallback:[StatusUpdate]:Called`)
+      this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Called`)
 
       const status = EventMessageUtils.getInteractionStatusFromEvent(message, this._state.inProgress)
       if (status !== null) {
@@ -193,14 +193,14 @@ export class MsalPlugin {
         )
       }
 
-      this._logger.debug(`MsalPlugin:install:EventCallback:[StatusUpdate]:Returned`)
+      this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Returned`)
     })
     this._eventCallbacks.push({ name: 'StatusUpdate', id: id })
 
     // Hooks for LogOutPopupEnd
     id = this.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.LOGOUT_END && message.interactionType === InteractionType.Popup) {
-        this._logger.debug(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Called`)
+        this._logger.verbose(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Called`)
 
         const router = options.router
         if (router != undefined) {
@@ -215,7 +215,7 @@ export class MsalPlugin {
           }
         }
 
-        this._logger.debug(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Returned`)
+        this._logger.verbose(`MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Returned`)
       }
     })
     this._eventCallbacks.push({ name: 'LogOutPopupEnd', id: id })
@@ -224,7 +224,7 @@ export class MsalPlugin {
     this.waitInit()
     await this.instance.initialize().then(() => {
       // Added handleRedirectPromise null Hook for Redirect flow - Reset inProgress state
-      this._logger.debug(`MsalPlugin:install:instance.initialize() finished`)
+      this._logger.verbose(`MsalPlugin:install:instance.initialize() finished`)
       this.instance
         .handleRedirectPromise()
         .catch((error) => {
@@ -233,14 +233,14 @@ export class MsalPlugin {
           this._logger.error(`MsalPlugin:install:handleRedirectPromise:catch:${error}`)
         })
         .finally(() => {
-          this._logger.debug(`MsalPlugin:install:handleRedirectPromise:finally:Called`)
+          this._logger.verbose(`MsalPlugin:install:handleRedirectPromise:finally:Called`)
           // Logics for finally block
           this._state.inProgress = InteractionStatus.None
         })
     })
     this.doneInit()
 
-    this._logger.debug('MsalPlugin:install():Returned')
+    this._logger.verbose('MsalPlugin:install():Returned')
   }
 
   private waitInit() {
