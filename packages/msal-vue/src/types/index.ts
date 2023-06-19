@@ -1,6 +1,6 @@
 // packages/msal-vue/src/types/index.ts
 
-import type { Ref } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
 import type { Router } from 'vue-router'
 import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
 import type { Configuration } from '@azure/msal-browser'
@@ -36,6 +36,7 @@ export type MsalPluginOptions = {
 
 /**
  * Type: MsalContext
+ * Returned by useMsal()
  * @public
  */
 export type MsalContext = {
@@ -50,10 +51,22 @@ export type MsalContext = {
 
 /**
  * Type: MsalAuthResult
+ * Returned by useMsalAuthentication
  * @public
  */
 export type MsalAuthResult = {
   acquireToken: (requestOverride?: PopupRequest | RedirectRequest | SilentRequest) => Promise<void>
   result: Ref<AuthenticationResult | null>
   error: Ref<AuthError | null>
+}
+
+/**
+ * Type: MsalAccount
+ * Returned by useMsalAccount
+ * @public
+ */
+export type MsalAccount = {
+  account: Ref<AccountInfo | null>
+  name: ComputedRef<string>
+  username: ComputedRef<string>
 }
