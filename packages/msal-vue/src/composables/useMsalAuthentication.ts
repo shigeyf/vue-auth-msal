@@ -63,6 +63,7 @@ export function useMsalAuthentication(): MsalAuthResult {
         )
         try {
           const response = await instance.acquireTokenSilent(tokenRequest)
+          logger.verbose(`useMsalAuthentication.acquireToken(): got response: ${JSON.stringify(response)}`)
           result.value = response
           error.value = null
         } catch (e: any) {
@@ -76,15 +77,20 @@ export function useMsalAuthentication(): MsalAuthResult {
               await instance
                 .loginPopup(tokenRequest)
                 .then((response) => {
+                  logger.verbose(
+                    `useMsalAuthentication.acquireToken():loginPopup() got response: ${JSON.stringify(response)}`,
+                  )
                   result.value = response
                   error.value = null
                 })
                 .catch((e) => {
+                  logger.verbose(`useMsalAuthentication.acquireToken():loginPopup() error: ${JSON.stringify(e)}`)
                   result.value = null
                   error.value = e as AuthError
                 })
             } else if (loginType === InteractionType.Redirect) {
               await instance.loginRedirect(tokenRequest).catch((e) => {
+                logger.verbose(`useMsalAuthentication.acquireToken():loginRedirect() error: ${JSON.stringify(e)}`)
                 result.value = null
                 error.value = e as AuthError
               })
