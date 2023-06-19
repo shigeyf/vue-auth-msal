@@ -16,7 +16,7 @@ export enum LogLevel {
 
 /**
  * Class Logger
- * @internal
+ * @public
  */
 export class Logger {
   private static _instance: Logger

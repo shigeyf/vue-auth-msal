@@ -1,10 +1,9 @@
 // packages/msal-vue/src/router/RouterGuard.ts
 
 import type { RouteLocationNormalized, Router } from 'vue-router'
-import type { MsalPlugin } from '../MsalPlugin'
-import { loggerInstance } from '../utils/Logger'
 import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
+import type { MsalPlugin } from '../MsalPlugin'
 
 /**
  * Function registerRouterGuard
@@ -12,18 +11,20 @@ import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-b
  * @internal
  */
 export function registerRouterGuard(router: Router, msal: MsalPlugin) {
+  const logger = msal.getLogger()
+
   // beforeEach
   /* eslint-disable @typescript-eslint/no-unused-vars */
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    loggerInstance.debug(`vue-router:beforeEach():Called`)
+    logger.debug(`vue-router:beforeEach():Called`)
 
-    loggerInstance.debug(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
-    loggerInstance.debug(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
+    logger.debug(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
+    logger.debug(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
 
     // Block router navigation (and rendering) before masl initialization finished
-    loggerInstance.debug(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
+    logger.debug(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
     await msal.waitInitPromise
-    loggerInstance.debug(`vue-router:beforeEach():Finished MsalPlugin Init`)
+    logger.debug(`vue-router:beforeEach():Finished MsalPlugin Init`)
 
     // true: allow the cuurent navigation.
     // false: cancel the current navigation.
@@ -31,11 +32,11 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
     // it will be reset to that of the from route.
     let result = true
 
-    loggerInstance.debug(`vue-router:beforeEach():MsalPlugin = `)
-    loggerInstance.debug(msal)
+    logger.debug(`vue-router:beforeEach():MsalPlugin = `)
+    logger.debug(msal)
 
     // Remove auth response hash from app URL when redirecting back to this app from AAD Auth.
-    if (msal.inProgress === InteractionStatus.HandleRedirect) {
+    if (msal.getCurrentInteractionStaus() === InteractionStatus.HandleRedirect) {
       // URL components in `hash` property are not encoded, while those in fullPath are encoded;
       // you cannot simply do String.replace() with `hash` property against `fullPath` property.
       const pathWithouHash = to.fullPath.split('#')[0]
@@ -49,16 +50,16 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
     // All matched routes (self and its parents) are populated into `matched` property as an array
     // Check if one of the mateched routes has meta:requiresAuth property
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-      loggerInstance.debug(`vue-router:beforeEach():Invoke RouterGuard for MsalPlugin because of 'requiresAuth' = true`)
+      logger.debug(`vue-router:beforeEach():Invoke RouterGuard for MsalPlugin because of 'requiresAuth' = true`)
 
       const request = {
-        ...msal.loginRequest,
+        ...msal.options.loginRequest,
         redirectStartPage: to.fullPath,
       }
-      result = await isAuthenticated(msal.instance, msal.interactionType, request)
+      result = await isAuthenticated(msal.instance, msal.options.interactionType, request)
     }
 
-    loggerInstance.debug(`vue-router:beforeEach():Returned`)
+    logger.debug(`vue-router:beforeEach():Returned`)
     return result
   })
 }

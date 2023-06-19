@@ -2,13 +2,13 @@
 
 // Plugin Modules
 import type { MsalContext } from '../types'
-import { MsalPlugin } from '../MsalPlugin'
-import { loggerInstance } from '../utils/Logger'
 // External Modules
-import { getCurrentInstance, toRefs } from 'vue'
+import { toRefs } from 'vue'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 import type { EndSessionPopupRequest, EndSessionRequest } from '@azure/msal-browser'
+import { useMsalPluginInstance } from './internals/useMsalPluginInstance'
+import { useMsalState } from './internals/useMsalState'
 
 /**
  * Function useMsal
@@ -16,46 +16,43 @@ import type { EndSessionPopupRequest, EndSessionRequest } from '@azure/msal-brow
  * @public
  */
 export function useMsal(): MsalContext {
-  const internalInstance = getCurrentInstance()
-  if (!internalInstance) {
-    throw 'useMsal() cannot be called outside the setup() function of a component.'
-  }
+  const plugin = useMsalPluginInstance()
+  const interactionType = plugin.options.interactionType
+  const loginRequest = plugin.options.loginRequest
+  const logger = plugin.getLogger()
+  const msal = plugin.instance
+  const msalState = useMsalState()
 
-  const { instance, interactionType, loginRequest, inProgress, accounts, tokens } = toRefs<MsalPlugin>(
-    internalInstance.appContext.config.globalProperties.$msal,
-  )
-  /* eslint-disable vue/no-ref-as-operand */
-  if (!instance || !inProgress || !accounts) {
-    throw 'useMsal() cannot be called without installing msal-vue plugin.'
-  }
+  // Setup Reactivity for components
+  const { inProgress, accounts } = toRefs(msalState)
 
   // Login
   const login = (loginRequestOverride?: PopupRequest | RedirectRequest | SilentRequest) => {
     if (inProgress.value === InteractionStatus.None) {
-      loggerInstance.debug(`useMsal.login():Called`)
+      logger.debug(`useMsal.login():Called`)
 
-      const request = loginRequestOverride != undefined ? loginRequestOverride : loginRequest.value
-      if (interactionType.value === InteractionType.Popup) {
-        loggerInstance.debug(`useMsal.login():loginPopup() with ${JSON.stringify(request)}`)
-        instance.value.loginPopup(request)
-      } else if (interactionType.value == InteractionType.Redirect) {
-        loggerInstance.debug(`useMsal.login():loginRedirect() with ${JSON.stringify(request)}`)
-        instance.value.loginRedirect(request)
+      const request = loginRequestOverride != undefined ? loginRequestOverride : loginRequest
+      if (interactionType === InteractionType.Popup) {
+        logger.debug(`useMsal.login():loginPopup() with ${JSON.stringify(request)}`)
+        msal.loginPopup(request)
+      } else if (interactionType == InteractionType.Redirect) {
+        logger.debug(`useMsal.login():loginRedirect() with ${JSON.stringify(request)}`)
+        msal.loginRedirect(request)
       }
 
-      loggerInstance.debug(`useMsal.login():Returned`)
+      logger.debug(`useMsal.login():Returned`)
     } else {
-      loggerInstance.debug(`useMsal.login():Blocked due to other process is running (state=${inProgress.value})`)
+      logger.debug(`useMsal.login():Blocked due to other process is running (state=${inProgress.value})`)
     }
   }
 
   // Logout
   const logout = (logoutRequestOverrides?: EndSessionPopupRequest | EndSessionRequest) => {
     if (inProgress.value === InteractionStatus.None) {
-      loggerInstance.debug(`useMsal.logout():Called`)
+      logger.debug(`useMsal.logout():Called`)
 
-      const requestAccount = { account: instance.value.getActiveAccount() }
-      if (interactionType.value === InteractionType.Popup) {
+      const requestAccount = { account: msal.getActiveAccount() }
+      if (interactionType === InteractionType.Popup) {
         const request =
           logoutRequestOverrides != undefined
             ? logoutRequestOverrides
@@ -63,56 +60,27 @@ export function useMsal(): MsalContext {
                 mainWindowRedirectUri: '/',
                 ...requestAccount,
               }
-        loggerInstance.debug(`useMsal.logout():logoutPopup() with ${JSON.stringify(request)}`)
-        instance.value.logoutPopup(request)
-      } else if (interactionType.value == InteractionType.Redirect) {
+        logger.debug(`useMsal.logout():logoutPopup() with ${JSON.stringify(request)}`)
+        msal.logoutPopup(request)
+      } else if (interactionType == InteractionType.Redirect) {
         const request = logoutRequestOverrides != undefined ? logoutRequestOverrides : requestAccount
-        loggerInstance.debug(`useMsal.logout():logoutRedirect() with ${JSON.stringify(request)}`)
-        instance.value.logoutRedirect(request)
+        logger.debug(`useMsal.logout():logoutRedirect() with ${JSON.stringify(request)}`)
+        msal.logoutRedirect(request)
       }
 
-      loggerInstance.debug(`useMsal.logout():Returned`)
+      logger.debug(`useMsal.logout():Returned`)
     } else {
-      loggerInstance.debug(`useMsal.logout():Blocked due to other process is running (state=${inProgress.value})`)
-    }
-  }
-
-  // AcquireToken
-  const acquireToken = (requestOverride?: PopupRequest | RedirectRequest | SilentRequest) => {
-    if (inProgress.value === InteractionStatus.None) {
-      loggerInstance.debug(`useMsal.acquireToken():Called`)
-
-      const tokenRequest = requestOverride || loginRequest.value
-      instance.value
-        .acquireTokenSilent(tokenRequest)
-        .then((authResult) => {
-          if (authResult != null) {
-            loggerInstance.info(`useMsal.acquireToken():then:authResult = ${JSON.stringify(authResult)}`)
-          } else {
-            loggerInstance.info(`useMsal.acquireToken():then:No AuthResult Response`)
-          }
-        })
-        .catch((e) => {
-          loggerInstance.info(`useMsal.acquireToken():catch:Error = ${JSON.stringify(e)}`)
-        })
-
-      loggerInstance.debug(`useMsal.acquireToken():Returned`)
-    } else {
-      loggerInstance.debug(`useMsal.acquireToken():Blocked due to other process is running (state=${inProgress.value})`)
+      logger.debug(`useMsal.logout():Blocked due to other process is running (state=${inProgress.value})`)
     }
   }
 
   return {
-    instance: instance.value,
-    interactionType: interactionType.value,
-    loginRequest: loginRequest.value,
+    instance: msal,
     inProgress: inProgress,
     accounts: accounts,
-    tokens: tokens,
     ops: {
       login: login,
       logout: logout,
-      acquireToken: acquireToken,
     },
   }
 }
