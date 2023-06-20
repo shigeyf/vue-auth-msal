@@ -3,7 +3,7 @@
 // Plugin Modules
 import type { MsalContext } from '../types'
 // External Modules
-import { toRefs, watch } from 'vue'
+import { toRefs } from 'vue'
 import { BrowserAuthError, BrowserAuthErrorMessage } from '@azure/msal-browser'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
