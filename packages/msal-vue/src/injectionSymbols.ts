@@ -12,6 +12,7 @@ import type { AccountInfo } from '@azure/msal-browser'
  */
 export type MsalState = UnwrapNestedRefs<{
   inProgress: InteractionStatus
+  activeAccount: AccountInfo | null
   accounts: AccountInfo[]
 }>
 

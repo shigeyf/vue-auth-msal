@@ -3,7 +3,7 @@
 // Plugin Modules
 import type { MsalContext } from '../types'
 // External Modules
-import { toRefs } from 'vue'
+import { toRefs, watch } from 'vue'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 import type { EndSessionPopupRequest, EndSessionRequest } from '@azure/msal-browser'
@@ -24,7 +24,13 @@ export function useMsal(): MsalContext {
   const msalState = useMsalState()
 
   // Setup Reactivity for components
-  const { inProgress, accounts } = toRefs(msalState)
+  const { inProgress, accounts, activeAccount } = toRefs(msalState)
+
+  // Watch accounts
+  watch(accounts, () => {
+    logger.verbose(`useMsal.watch[accounts]:Updated account`)
+    activeAccount.value = plugin.instance.getActiveAccount()
+  })
 
   // Login
   const login = (loginRequestOverride?: PopupRequest | RedirectRequest | SilentRequest) => {
@@ -33,10 +39,10 @@ export function useMsal(): MsalContext {
 
       const request = loginRequestOverride != undefined ? loginRequestOverride : loginRequest
       if (interactionType === InteractionType.Popup) {
-        logger.verbose(`useMsal.login():loginPopup() with ${JSON.stringify(request)}`)
+        logger.verbose(`useMsal.login():loginPopup triggered with ${JSON.stringify(request)}`)
         msal.loginPopup(request)
       } else if (interactionType == InteractionType.Redirect) {
-        logger.verbose(`useMsal.login():loginRedirect() with ${JSON.stringify(request)}`)
+        logger.verbose(`useMsal.login():loginRedirect triggered with ${JSON.stringify(request)}`)
         msal.loginRedirect(request)
       }
 
@@ -60,11 +66,11 @@ export function useMsal(): MsalContext {
                 mainWindowRedirectUri: '/',
                 ...requestAccount,
               }
-        logger.verbose(`useMsal.logout():logoutPopup() with ${JSON.stringify(request)}`)
+        logger.verbose(`useMsal.logout():logoutPopup triggered with ${JSON.stringify(request)}`)
         msal.logoutPopup(request)
       } else if (interactionType == InteractionType.Redirect) {
         const request = logoutRequestOverrides != undefined ? logoutRequestOverrides : requestAccount
-        logger.verbose(`useMsal.logout():logoutRedirect() with ${JSON.stringify(request)}`)
+        logger.verbose(`useMsal.logout():logoutRedirect triggered with ${JSON.stringify(request)}`)
         msal.logoutRedirect(request)
       }
 
@@ -77,6 +83,7 @@ export function useMsal(): MsalContext {
   return {
     instance: msal,
     inProgress: inProgress,
+    account: activeAccount,
     accounts: accounts,
     ops: {
       login: login,

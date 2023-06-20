@@ -65,6 +65,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     // Initialize values for state
     this._state = reactive({
       inProgress: InteractionStatus.None,
+      activeAccount: this.instance.getActiveAccount(),
       accounts: this.instance.getAllAccounts(),
     })
 
@@ -120,7 +121,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     let id: string | null = null
     // Hooks for Debug
     id = this.instance.addEventCallback((message: EventMessage) => {
-      this._logger.verbose(`MsalPlugin:install:EventCallback:[ForDebug]:Event Message: ${message.eventType}`)
+      this._logger.verbose(`MsalPlugin:install:EventCallback:[ForDebug]:EventType: ${message.eventType}`)
     })
     this._eventCallbacks.push({ name: 'ForDebug', id: id })
 
@@ -131,15 +132,14 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
 
         if (message.payload) {
           const payload = message.payload as AuthenticationResult
-          this._logger.info(`MsalPlugin:install:EventCallback:[LoginSuccess]:Payload = ${JSON.stringify(payload)}`)
+          this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Payload: ${JSON.stringify(payload)}`)
 
           // Update accounts
           const account = payload.account
           if (account != null) {
             this.instance.setActiveAccount(account)
-            this._logger.info(
-              `MsalPlugin:install:EventCallback:[LoginSuccess]:Set Active Account = ${account.username}`,
-            )
+            this._state.activeAccount = this.instance.getActiveAccount()
+            this._logger.info(`MsalPlugin:install:EventCallback:[LoginSuccess]:Set ActiveAccount: ${account.username}`)
           }
         }
 
@@ -168,9 +168,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
             if (!accountArraysAreEqual(currentAccounts, this._state.accounts)) {
               this._state.accounts = currentAccounts
               this._logger.info(
-                `MsalPlugin:install:EventCallback:[AccountsUpdate]:Accounts Updated: ${JSON.stringify(
-                  this._state.accounts,
-                )}`,
+                `MsalPlugin:install:EventCallback:[AccountsUpdate]:Updated to: ${JSON.stringify(this._state.accounts)}`,
               )
             }
 
@@ -185,12 +183,11 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     id = this.instance.addEventCallback((message: EventMessage) => {
       this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Called`)
 
+      const oldStatus = this._state.inProgress
       const status = EventMessageUtils.getInteractionStatusFromEvent(message, this._state.inProgress)
       if (status !== null) {
         this._state.inProgress = status
-        this._logger.info(
-          `MsalPlugin:install:EventCallback:[StatusUpdate]:Status Updated from ${this._state.inProgress} to ${status}`,
-        )
+        this._logger.info(`MsalPlugin:install:EventCallback:[StatusUpdate]:Updated from ${oldStatus} to ${status}`)
       }
 
       this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Returned`)
@@ -208,7 +205,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
           if (currentRoute.meta.requiresAuth) {
             if (currentRoute.meta.popupLogoutFallback != undefined) {
               this._logger.info(
-                `MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Route Fallback to ${currentRoute.meta.popupLogoutFallback}`,
+                `MsalPlugin:install:EventCallback:[LogOutPopupEnd]:Route to: ${currentRoute.meta.popupLogoutFallback}`,
               )
               router.push(currentRoute.meta.popupLogoutFallback)
             }
@@ -224,13 +221,27 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     this.waitInit()
     await this.instance.initialize().then(() => {
       // Added handleRedirectPromise null Hook for Redirect flow - Reset inProgress state
-      this._logger.verbose(`MsalPlugin:install:instance.initialize() finished`)
+      this._logger.verbose(`MsalPlugin:install:instance.initialize finished`)
       this.instance
         .handleRedirectPromise()
+        .then((response: AuthenticationResult | null) => {
+          if (response != null) {
+            this._logger.verbose(
+              `MsalPlugin:install:handleRedirectPromise success response: ${JSON.stringify(response)}`,
+            )
+            if (response.account != null) {
+              this.instance.setActiveAccount(response.account)
+              this._state.activeAccount = this.instance.getActiveAccount()
+              this._logger.info(
+                `MsalPlugin:install:handleRedirectPromise:Set ActiveAccount: ${response.account.username}`,
+              )
+            }
+          }
+        })
         .catch((error) => {
           // Handle errors (either in the library or coming back from the server)
           // Errors should be handled by listening to the LOGIN_FAILURE event
-          this._logger.error(`MsalPlugin:install:handleRedirectPromise:catch:${error}`)
+          this._logger.error(`MsalPlugin:install:handleRedirectPromise error: ${error}`)
         })
         .finally(() => {
           this._logger.verbose(`MsalPlugin:install:handleRedirectPromise:finally:Called`)

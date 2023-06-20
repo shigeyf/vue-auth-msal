@@ -42,6 +42,7 @@ export type MsalPluginOptions = {
 export type MsalContext = {
   instance: PublicClientApplication
   inProgress: Ref<InteractionStatus>
+  account: Ref<AccountInfo | null>
   accounts: Ref<AccountInfo[]>
   ops: {
     login: (loginRequestOverride?: PopupRequest | RedirectRequest | SilentRequest) => void
@@ -69,4 +70,5 @@ export type MsalAccount = {
   account: Ref<AccountInfo | null>
   name: ComputedRef<string>
   username: ComputedRef<string>
+  switchAccount: (newAccount: AccountInfo) => Promise<void>
 }
