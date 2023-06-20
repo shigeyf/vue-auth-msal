@@ -8,7 +8,7 @@ import type { MsalAuthResult } from '../types'
 import { useMsalPluginInstance } from './internals/useMsalPluginInstance'
 // External Modules
 import { ref } from 'vue'
-import { BrowserAuthErrorMessage, InteractionStatus, InteractionType } from '@azure/msal-browser'
+import { InteractionRequiredAuthError, InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { AuthenticationResult, AuthError, PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
 /**
@@ -24,7 +24,7 @@ export function useMsalAuthentication(): MsalAuthResult {
 
   const { instance, inProgress } = useMsal()
 
-  const loginType = interactionType
+  const loginInteractionType = interactionType
   const isInProgress = ref<boolean>(false)
   const result = ref<AuthenticationResult | null>(null)
   const error = ref<AuthError | null>(null)
@@ -38,18 +38,20 @@ export function useMsalAuthentication(): MsalAuthResult {
 
       // Process for handleRedirectPromise()
       if (inProgress.value === InteractionStatus.HandleRedirect) {
-        logger.verbose(`useMsalAuthentication.acquireToken():Trigger handleRedirectPromise()`)
+        logger.verbose(`useMsalAuthentication.acquireToken():handleRedirectPromise triggered`)
         try {
           const response = await instance.handleRedirectPromise()
           if (response) {
             logger.verbose(
-              `useMsalAuthentication.acquireToken():handleRedirectPromise() got response: ${JSON.stringify(response)}`,
+              `useMsalAuthentication.acquireToken():handleRedirectPromise success response: ${JSON.stringify(
+                response,
+              )}`,
             )
             result.value = response
             error.value = null
           }
         } catch (e) {
-          logger.verbose(`useMsalAuthentication.acquireToken():handleRedirectPromise() got error: ${JSON.stringify(e)}`)
+          logger.verbose(`useMsalAuthentication.acquireToken():handleRedirectPromise error: ${JSON.stringify(e)}`)
           result.value = null
           error.value = e as AuthError
         }
@@ -59,38 +61,40 @@ export function useMsalAuthentication(): MsalAuthResult {
       else if (inProgress.value === InteractionStatus.None) {
         const tokenRequest = requestOverride || loginRequest
         logger.verbose(
-          `useMsalAuthentication.acquireToken():Trigger acquireTokenSilent() with ${JSON.stringify(tokenRequest)}`,
+          `useMsalAuthentication.acquireToken():acquireTokenSilent triggered with ${JSON.stringify(tokenRequest)}`,
         )
         try {
           const response = await instance.acquireTokenSilent(tokenRequest)
-          logger.verbose(`useMsalAuthentication.acquireToken(): got response: ${JSON.stringify(response)}`)
+          logger.verbose(
+            `useMsalAuthentication.acquireToken():acquireTokenSilent success response: ${JSON.stringify(response)}`,
+          )
           result.value = response
           error.value = null
         } catch (e: any) {
-          logger.verbose(
-            `useMsalAuthentication.acquireToken():Thrown error by acquireTokenSilent(): error = ${JSON.stringify(e)}`,
-          )
+          logger.verbose(`useMsalAuthentication.acquireToken():acquireTokenSilent error = ${JSON.stringify(e)}`)
           // Try Login (Popup or Redirect) when no account error
-          if (e['errorCode'] === BrowserAuthErrorMessage.noAccountError.code && instance.getAllAccounts().length == 0) {
-            logger.verbose(`useMsalAuthentication.acquireToken():Trigger login() with ${JSON.stringify(tokenRequest)}`)
-            if (loginType === InteractionType.Popup) {
+          if (e instanceof InteractionRequiredAuthError) {
+            logger.verbose(
+              `useMsalAuthentication.acquireToken():interactive login triggered with ${JSON.stringify(tokenRequest)}`,
+            )
+            if (loginInteractionType === InteractionType.Popup) {
               await instance
                 .loginPopup(tokenRequest)
                 .then((response) => {
                   logger.verbose(
-                    `useMsalAuthentication.acquireToken():loginPopup() got response: ${JSON.stringify(response)}`,
+                    `useMsalAuthentication.acquireToken():loginPopup success response: ${JSON.stringify(response)}`,
                   )
                   result.value = response
                   error.value = null
                 })
                 .catch((e) => {
-                  logger.verbose(`useMsalAuthentication.acquireToken():loginPopup() error: ${JSON.stringify(e)}`)
+                  logger.verbose(`useMsalAuthentication.acquireToken():loginPopup error: ${JSON.stringify(e)}`)
                   result.value = null
                   error.value = e as AuthError
                 })
-            } else if (loginType === InteractionType.Redirect) {
+            } else {
               await instance.loginRedirect(tokenRequest).catch((e) => {
-                logger.verbose(`useMsalAuthentication.acquireToken():loginRedirect() error: ${JSON.stringify(e)}`)
+                logger.verbose(`useMsalAuthentication.acquireToken():loginRedirect error: ${JSON.stringify(e)}`)
                 result.value = null
                 error.value = e as AuthError
               })
