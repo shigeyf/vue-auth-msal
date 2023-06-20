@@ -95,9 +95,16 @@ export function useMsalAuthentication(): MsalAuthResult {
                   error.value = null
                 })
                 .catch((e) => {
-                  logger.verbose(`useMsalAuthentication.acquireToken():loginPopup error: ${JSON.stringify(e)}`)
                   result.value = null
                   error.value = e as AuthError
+                  if (
+                    e instanceof BrowserAuthError &&
+                    (e as BrowserAuthError).errorCode === BrowserAuthErrorMessage.userCancelledError.code
+                  ) {
+                    logger.info(`useMsal.login():loginPopup user_cancelled`)
+                  } else {
+                    logger.error(`useMsal.login():loginPopup error: ${JSON.stringify(e)}`)
+                  }
                 })
             } else {
               await instance.loginRedirect(tokenRequest).catch((e) => {
