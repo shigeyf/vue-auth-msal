@@ -13,7 +13,8 @@ import type { App, Plugin, UnwrapNestedRefs } from 'vue'
 import { reactive } from 'vue'
 import { InteractionStatus, InteractionType, PublicClientApplication } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest, WrapperSKU } from '@azure/msal-browser'
-import { type AuthenticationResult, type EventMessage, EventMessageUtils, EventType } from '@azure/msal-browser'
+import type { AccountInfo, AuthenticationResult } from '@azure/msal-browser'
+import { type EventMessage, EventMessageUtils, EventType } from '@azure/msal-browser'
 import type { Logger } from '@azure/msal-browser'
 
 /**
@@ -129,20 +130,13 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     id = this.instance.addEventCallback((message: EventMessage) => {
       if (message.eventType === EventType.LOGIN_SUCCESS) {
         this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Called`)
-
         if (message.payload) {
-          const payload = message.payload as AuthenticationResult
-          this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Payload: ${JSON.stringify(payload)}`)
-
-          // Update accounts
-          const account = payload.account
-          if (account != null) {
-            this.instance.setActiveAccount(account)
-            this._state.activeAccount = this.instance.getActiveAccount()
-            this._logger.info(`MsalPlugin:install:EventCallback:[LoginSuccess]:Set ActiveAccount: ${account.username}`)
+          const result = message.payload as AuthenticationResult
+          this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Payload: ${JSON.stringify(result)}`)
+          if (result.account != null) {
+            this.setNewActiveAccount(result.account)
           }
         }
-
         this._logger.verbose(`MsalPlugin:install:EventCallback:[LoginSuccess]:Returned`)
       }
     })
@@ -151,6 +145,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     // Hooks for Accounts update
     id = this.instance.addEventCallback((message: EventMessage) => {
       switch (message.eventType) {
+        case EventType.LOGOUT_END:
         case EventType.ACCOUNT_ADDED:
         case EventType.ACCOUNT_REMOVED:
         case EventType.LOGIN_SUCCESS:
@@ -160,20 +155,12 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
         case EventType.ACQUIRE_TOKEN_SUCCESS:
         case EventType.ACQUIRE_TOKEN_FAILURE:
         case EventType.HANDLE_REDIRECT_END:
-        case EventType.LOGOUT_END:
-          {
-            this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Called`)
-
-            const currentAccounts = this.instance.getAllAccounts()
-            if (!accountArraysAreEqual(currentAccounts, this._state.accounts)) {
-              this._state.accounts = currentAccounts
-              this._logger.info(
-                `MsalPlugin:install:EventCallback:[AccountsUpdate]:Updated to: ${JSON.stringify(this._state.accounts)}`,
-              )
-            }
-
-            this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Returned`)
+          this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Called`)
+          this.updateAccounts()
+          if (message.eventType === EventType.LOGOUT_END) {
+            this.resetAccount()
           }
+          this._logger.verbose(`MsalPlugin:install:EventCallback:[AccountsUpdate]:Returned`)
           break
       }
     })
@@ -182,14 +169,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     // Hooks for Status Updating
     id = this.instance.addEventCallback((message: EventMessage) => {
       this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Called`)
-
-      const oldStatus = this._state.inProgress
-      const status = EventMessageUtils.getInteractionStatusFromEvent(message, this._state.inProgress)
-      if (status !== null) {
-        this._state.inProgress = status
-        this._logger.info(`MsalPlugin:install:EventCallback:[StatusUpdate]:Updated from ${oldStatus} to ${status}`)
-      }
-
+      this.updateStatusByMessage(message)
       this._logger.verbose(`MsalPlugin:install:EventCallback:[StatusUpdate]:Returned`)
     })
     this._eventCallbacks.push({ name: 'StatusUpdate', id: id })
@@ -230,20 +210,12 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
               `MsalPlugin:install:handleRedirectPromise success response: ${JSON.stringify(response)}`,
             )
             if (response.account != null) {
-              this.instance.setActiveAccount(response.account)
-              this._state.activeAccount = this.instance.getActiveAccount()
-              this._logger.info(
-                `MsalPlugin:install:handleRedirectPromise:Set ActiveAccount: ${response.account.username}`,
-              )
+              this.setNewActiveAccount(response.account)
             }
           } else {
-            this._state.accounts = this.instance.getAllAccounts()
-            // Switch to an existing account
-            if (this._state.accounts.length > 0) {
-              const account = this._state.accounts[0]
-              this.instance.setActiveAccount(account)
-              this._state.activeAccount = account
-            }
+            this._logger.verbose(`MsalPlugin:install:handleRedirectPromise success response: null`)
+            this.resetAccount()
+            this.updateAccounts()
           }
         })
         .catch((error) => {
@@ -254,7 +226,7 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
         .finally(() => {
           this._logger.verbose(`MsalPlugin:install:handleRedirectPromise:finally:Called`)
           // Logics for finally block
-          this._state.inProgress = InteractionStatus.None
+          this.resetInProgress()
         })
     })
     this.doneInit()
@@ -262,12 +234,63 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
     this._logger.verbose('MsalPlugin:install():Returned')
   }
 
+  //
+  // State handling functions
+  //
+
+  private updateStatusByMessage(message: EventMessage) {
+    const _status = this._state.inProgress
+    const status = EventMessageUtils.getInteractionStatusFromEvent(message, this._state.inProgress)
+    if (status !== null) {
+      this._state.inProgress = status
+      this._logger.info(`MsalPlugin:updateStatusByMessage:Updated from ${_status} to ${status}`)
+    }
+  }
+
+  private resetInProgress() {
+    this._state.inProgress = InteractionStatus.None
+    this._logger.info(`MsalPlugin:resetInProgress: inProgress to none`)
+  }
+
+  private updateAccounts() {
+    const accounts = this.instance.getAllAccounts()
+    if (!accountArraysAreEqual(accounts, this._state.accounts)) {
+      this._state.accounts = accounts
+      this._logger.info(`MsalPlugin:updateAccounts:Updated to: ${JSON.stringify(this._state.accounts)}`)
+    }
+  }
+
+  private setNewActiveAccount(account: AccountInfo) {
+    this.instance.setActiveAccount(account)
+    this._state.activeAccount = this.instance.getActiveAccount()
+    this._logger.info(`MsalPlugin:setNewActiveAccount: ${account.username}`)
+  }
+
+  private resetAccount() {
+    const accounts = this.instance.getAllAccounts()
+    // No account is stored
+    if (accounts.length === 0) {
+      this._state.activeAccount = null
+      this._logger.info(`MsalPlugin:resetAccount: null`)
+    }
+    // One or more account are stored
+    else if (accounts.length > 0) {
+      const account = this._state.accounts[0]
+      this.instance.setActiveAccount(account)
+      this._state.activeAccount = account
+      this._logger.info(`MsalPlugin:resetAccount: ${account.username}`)
+    }
+  }
+
+  //
+  // Initialization control functions
+  //
+
   private waitInit() {
     if (this._initResolver == null) {
       this.waitInitPromise = new Promise((resolve) => (this._initResolver = resolve))
     }
   }
-
   private doneInit() {
     if (this._initResolver != null) {
       this._initResolver()
