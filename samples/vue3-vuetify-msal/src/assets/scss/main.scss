@@ -1,0 +1,6 @@
+// src/assets/scss/main.scss
+@use 'vuetify' with (
+  $utilities: false,
+  $color-pack: true
+);
+@import './base';
