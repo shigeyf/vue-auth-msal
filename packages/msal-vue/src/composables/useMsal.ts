@@ -4,6 +4,7 @@
 import type { MsalContext } from '../types'
 // External Modules
 import { toRefs, watch } from 'vue'
+import { BrowserAuthError, BrowserAuthErrorMessage } from '@azure/msal-browser'
 import { InteractionStatus, InteractionType } from '@azure/msal-browser'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 import type { EndSessionPopupRequest, EndSessionRequest } from '@azure/msal-browser'
@@ -26,12 +27,6 @@ export function useMsal(): MsalContext {
   // Setup Reactivity for components
   const { inProgress, accounts, activeAccount } = toRefs(msalState)
 
-  // Watch accounts
-  watch(accounts, () => {
-    logger.verbose(`useMsal.watch[accounts]:Updated account`)
-    activeAccount.value = plugin.instance.getActiveAccount()
-  })
-
   // Login
   const login = (loginRequestOverride?: PopupRequest | RedirectRequest | SilentRequest) => {
     if (inProgress.value === InteractionStatus.None) {
@@ -40,7 +35,16 @@ export function useMsal(): MsalContext {
       const request = loginRequestOverride != undefined ? loginRequestOverride : loginRequest
       if (interactionType === InteractionType.Popup) {
         logger.verbose(`useMsal.login():loginPopup triggered with ${JSON.stringify(request)}`)
-        msal.loginPopup(request)
+        msal.loginPopup(request).catch((e) => {
+          if (
+            e instanceof BrowserAuthError &&
+            (e as BrowserAuthError).errorCode === BrowserAuthErrorMessage.userCancelledError.code
+          ) {
+            logger.info(`useMsal.login():loginPopup user_cancelled`)
+          } else {
+            logger.error(`useMsal.login():loginPopup error: ${JSON.stringify(e)}`)
+          }
+        })
       } else if (interactionType == InteractionType.Redirect) {
         logger.verbose(`useMsal.login():loginRedirect triggered with ${JSON.stringify(request)}`)
         msal.loginRedirect(request)
