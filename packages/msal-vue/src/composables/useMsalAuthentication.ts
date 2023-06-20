@@ -9,7 +9,9 @@ import { useMsalPluginInstance } from './internals/useMsalPluginInstance'
 // External Modules
 import { ref } from 'vue'
 import { InteractionRequiredAuthError, InteractionStatus, InteractionType } from '@azure/msal-browser'
-import type { AuthenticationResult, AuthError, PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
+import { BrowserAuthError, BrowserAuthErrorMessage } from '@azure/msal-browser'
+import type { AuthenticationResult, AuthError } from '@azure/msal-browser'
+import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 
 /**
  * Function useMsalAuthentication
@@ -73,7 +75,12 @@ export function useMsalAuthentication(): MsalAuthResult {
         } catch (e: any) {
           logger.verbose(`useMsalAuthentication.acquireToken():acquireTokenSilent error = ${JSON.stringify(e)}`)
           // Try Login (Popup or Redirect) when no account error
-          if (e instanceof InteractionRequiredAuthError) {
+          if (
+            e instanceof InteractionRequiredAuthError ||
+            (e instanceof BrowserAuthError &&
+              (e as BrowserAuthError).errorCode === BrowserAuthErrorMessage.noAccountError.code &&
+              instance.getAllAccounts().length == 0)
+          ) {
             logger.verbose(
               `useMsalAuthentication.acquireToken():interactive login triggered with ${JSON.stringify(tokenRequest)}`,
             )
