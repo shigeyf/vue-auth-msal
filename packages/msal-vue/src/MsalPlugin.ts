@@ -236,6 +236,14 @@ export class MsalPlugin implements Pick<Plugin<MsalPluginOptions>, keyof Plugin<
                 `MsalPlugin:install:handleRedirectPromise:Set ActiveAccount: ${response.account.username}`,
               )
             }
+          } else {
+            this._state.accounts = this.instance.getAllAccounts()
+            // Switch to an existing account
+            if (this._state.accounts.length > 0) {
+              const account = this._state.accounts[0]
+              this.instance.setActiveAccount(account)
+              this._state.activeAccount = account
+            }
           }
         })
         .catch((error) => {
