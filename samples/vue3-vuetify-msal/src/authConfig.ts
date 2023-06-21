@@ -3,16 +3,16 @@
 import type { Configuration } from '@azure/msal-browser'
 import { InteractionType, LogLevel } from '@azure/msal-browser'
 
+const tenantId = import.meta.env.VITE_TENANT_ID || 'YOUR_AAD_TENANT_ID_ENTER_HERE'
+const clientId = import.meta.env.VITE_CLIENT_ID || 'YOUR_AAD_SPA_APP_ID_ENTER_HERE'
+
 // Config object to be passed to Msal on creation
 export const msalConfig: Configuration = {
   auth: {
-    clientId: '9504f339-7e58-4367-93b0-1f5b4264b92c',
-    authority: 'https://login.microsoftonline.com/223bcdb6-97c3-4545-86f1-1be0b61ca5ee',
-    // authority: 'https://login.microsoftonline.com/common',
-    // Must be registered as a SPA redirectURI on your app registration
-    redirectUri: '/',
-    // Must be registered as a SPA redirectURI on your app registration
-    postLogoutRedirectUri: '/',
+    clientId: clientId,
+    authority: `https://login.microsoftonline.com/${tenantId}`,
+    redirectUri: '/', // Must be registered as a SPA redirectURI on your app registration
+    postLogoutRedirectUri: '/', // Must be registered as a SPA redirectURI on your app registration
   },
   cache: {
     cacheLocation: 'localStorage',
