@@ -11,7 +11,7 @@
   "dependencies": {
     "@azure/msal-browser": "file:../../externals/msal-js/lib/msal-browser",
     "@microsoft/microsoft-graph-client": "^3.0.5",
-    "vue-auth-msal": "file:../../packages/msal-vue",
+    "vue-auth-msal": "file:../../packages/vue-auth-msal",
     "roboto-fontface": "^0.10.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2",

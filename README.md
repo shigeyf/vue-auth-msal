@@ -104,8 +104,8 @@ To build the `vue-auth-msal` library, you can do the following:
 ```bash
 // Install dev dependencies from root of repo
 npm install
-// Change to msal-vue package directory
-cd packages/msal-vue/
+// Change to vue-auth-msal package directory
+cd packages/vue-auth-msal/
 // To run build only for vue-auth-msal package
 npm run build
 ```
