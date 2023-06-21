@@ -2,7 +2,8 @@
   "private": true,
   "workspaces": [
     "packages/msal-vue",
-    "samples/vue3-vuetify-msal"
+    "samples/vue3-vuetify-msal",
+    "samples/vue3-vuetify-msal-b2c"
   ],
   "name": "msal-vue",
   "license": "Apache-2.0",
