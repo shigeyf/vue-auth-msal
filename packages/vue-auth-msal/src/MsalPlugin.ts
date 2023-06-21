@@ -1,4 +1,4 @@
-// packages/msal-vue/src/plugin.ts
+// packages/vue-auth-msal/src/plugin.ts
 
 // Plugin Modules
 import type { MsalCreateOptions, MsalPluginOptions } from './types'

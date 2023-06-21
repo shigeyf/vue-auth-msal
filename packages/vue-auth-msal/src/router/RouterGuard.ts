@@ -1,4 +1,4 @@
-// packages/msal-vue/src/router/RouterGuard.ts
+// packages/vue-auth-msal/src/router/RouterGuard.ts
 
 import type { RouteLocationNormalized, Router } from 'vue-router'
 import { InteractionType, InteractionStatus, PublicClientApplication } from '@azure/msal-browser'

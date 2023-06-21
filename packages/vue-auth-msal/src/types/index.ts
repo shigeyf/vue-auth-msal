@@ -1,4 +1,4 @@
-// packages/msal-vue/src/types/index.ts
+// packages/vue-auth-msal/src/types/index.ts
 
 import type { Ref, ComputedRef } from 'vue'
 import type { Router } from 'vue-router'

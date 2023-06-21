@@ -1,4 +1,4 @@
-// packages/msal-vue/src/router/AuthNavigationClient.ts
+// packages/vue-auth-msal/src/router/AuthNavigationClient.ts
 
 // External Modules
 import { NavigationClient, PublicClientApplication, type NavigationOptions } from '@azure/msal-browser'

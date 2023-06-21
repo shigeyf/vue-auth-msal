@@ -1,4 +1,4 @@
-// packages/msal-vue/src/utils/Logger.ts
+// packages/vue-auth-msal/src/utils/Logger.ts
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

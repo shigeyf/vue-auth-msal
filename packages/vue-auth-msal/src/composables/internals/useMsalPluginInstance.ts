@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/internals/useMsalPluginInstance.ts
+// packages/vue-auth-msal/src/composables/internals/useMsalPluginInstance.ts
 
 import { inject } from 'vue'
 import { MsalPlugin } from '../../MsalPlugin'

@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/useIsAuthenticated.ts
+// packages/vue-auth-msal/src/composables/useIsAuthenticated.ts
 
 // Plugin Modules
 import { useMsal } from './useMsal'

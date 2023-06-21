@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/useAccount.ts
+// packages/vue-auth-msal/src/composables/useAccount.ts
 
 // Plugin Modules
 import { useMsal } from './useMsal'

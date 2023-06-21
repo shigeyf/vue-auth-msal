@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/useMsalAuthentication.ts
+// packages/vue-auth-msal/src/composables/useMsalAuthentication.ts
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

@@ -1,4 +1,4 @@
-// packages/msal-vue/src/injectionSymbols.ts
+// packages/vue-auth-msal/src/injectionSymbols.ts
 
 import type { InjectionKey } from 'vue'
 import type { MsalPlugin } from './MsalPlugin'

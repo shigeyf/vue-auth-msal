@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/internals/useMsalState.ts
+// packages/vue-auth-msal/src/composables/internals/useMsalState.ts
 
 import { inject } from 'vue'
 import type { MsalState } from '../../injectionSymbols'

@@ -1,4 +1,4 @@
-// packages/msal-vue/src/packageMetadata.ts
+// packages/vue-auth-msal/src/packageMetadata.ts
 
 /** @public */
 export const pkgName = '__pkgName__'

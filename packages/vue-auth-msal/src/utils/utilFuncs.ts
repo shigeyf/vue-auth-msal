@@ -1,4 +1,4 @@
-// packages/msal-vue/src/utils/utilFuncs.ts
+// packages/vue-auth-msal/src/utils/utilFuncs.ts
 
 import type { AccountInfo } from '@azure/msal-browser'
 

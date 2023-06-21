@@ -1,4 +1,4 @@
-// packages/msal-vue/src/composables/useMsal.ts
+// packages/vue-auth-msal/src/composables/useMsal.ts
 
 // Plugin Modules
 import type { MsalContext } from '../types'
