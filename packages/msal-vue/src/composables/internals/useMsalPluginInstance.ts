@@ -13,7 +13,7 @@ export function useMsalPluginInstance(): MsalPlugin {
   const msalPluginInstance = inject(msalPluginKey)
 
   if (msalPluginInstance == undefined) {
-    throw 'useMsal*() cannot be used without installing msal-vue plugin.'
+    throw 'useMsal*() cannot be used without installing vue-auth-msal plugin.'
   }
   return msalPluginInstance
 }

@@ -4,9 +4,9 @@
 
 import { type Ref, ref } from 'vue'
 import { ResponseType } from '@microsoft/microsoft-graph-client'
-import { useMsal } from 'msal-vue'
-import { useMsalAuthentication } from 'msal-vue'
-import type { MsalAuthResult } from 'msal-vue'
+import { useMsal } from 'vue-auth-msal'
+import { useMsalAuthentication } from 'vue-auth-msal'
+import type { MsalAuthResult } from 'vue-auth-msal'
 import { getGraphClient } from '@/helpers/msGraph'
 import type { PopupRequest, RedirectRequest, SilentRequest } from '@azure/msal-browser'
 

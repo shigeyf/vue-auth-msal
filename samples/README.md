@@ -1,4 +1,4 @@
-# Sample Vue applications with `msal-vue` plugin
+# Sample Vue applications with `vue-auth-msal` plugin
 
 Our [samples directory](./samples/) contains several example apps you can spin up to see how this plugin can be used in different scenarios.
 

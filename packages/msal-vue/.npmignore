@@ -1,0 +1,6 @@
+/src/
+/api-extractor.json
+/rollup.config.mjs
+/rollup.config.*.mjs
+/tsconfig.json
+/tsconfig.*.json

@@ -5,7 +5,7 @@
   import { ref, computed } from 'vue'
   import { useTheme } from 'vuetify'
   import { mdiWeatherNight, mdiWeatherSunny } from '@mdi/js'
-  import { useIsAuthenticated } from 'msal-vue'
+  import { useIsAuthenticated } from 'vue-auth-msal'
   import SignInButton from '@/components/SignInButton.vue'
   import SignOutButton from '@/components/SignOutButton.vue'
 

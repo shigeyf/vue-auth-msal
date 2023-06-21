@@ -13,7 +13,7 @@ export function useMsalState(): MsalState {
   const msalState = inject(msalStateKey)
 
   if (msalState == undefined) {
-    throw 'useMsal*() cannot be used without installing msal-vue plugin.'
+    throw 'useMsal*() cannot be used without installing vue-auth-msal plugin.'
   }
   return msalState
 }

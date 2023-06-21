@@ -2,7 +2,7 @@
 
 <script lang="ts" setup>
   // scripts
-  import { useMsal } from 'msal-vue'
+  import { useMsal } from 'vue-auth-msal'
   const { ops } = useMsal()
   const items = [{ title: 'Login', func: ops.login }]
 </script>

@@ -4,7 +4,7 @@
   // Scripts
   import MsalAccount from '@/components/MsalAccount.vue'
   import MsalIdTokenClaims from '@/components/MsalIdTokenClaims.vue'
-  import { useMsalAuthentication } from 'msal-vue'
+  import { useMsalAuthentication } from 'vue-auth-msal'
 
   const { acquireToken } = useMsalAuthentication()
   // Async setup

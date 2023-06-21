@@ -4,7 +4,7 @@
   // Scripts
   import { ref } from 'vue'
   //import { mergeProps } from 'vue'
-  import { useAccount, useMsal, useMsalAuthentication } from 'msal-vue'
+  import { useAccount, useMsal, useMsalAuthentication } from 'vue-auth-msal'
   import { type AccountInfo } from '@azure/msal-browser'
   import { mdiAccount } from '@mdi/js'
   import { mdiAccountCircle } from '@mdi/js'

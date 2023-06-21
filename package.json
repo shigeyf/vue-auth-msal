@@ -5,7 +5,7 @@
     "samples/vue3-vuetify-msal",
     "samples/vue3-vuetify-msal-b2c"
   ],
-  "name": "msal-vue",
+  "name": "vue-auth-msal-project",
   "license": "Apache-2.0",
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",

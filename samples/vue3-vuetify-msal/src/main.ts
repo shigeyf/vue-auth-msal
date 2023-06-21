@@ -9,8 +9,8 @@ import { createApp } from 'vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
 import { installWebFonts } from './plugins/webfonts'
-import { createMsal, MsalPlugin } from 'msal-vue'
-import type { MsalCreateOptions, MsalPluginOptions } from 'msal-vue'
+import { createMsal, MsalPlugin } from 'vue-auth-msal'
+import type { MsalCreateOptions, MsalPluginOptions } from 'vue-auth-msal'
 // MSAL Plugin Configurations
 import { msalConfig, interactionType, loginRequest } from './authConfig'
 

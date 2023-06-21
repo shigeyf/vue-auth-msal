@@ -4,7 +4,7 @@
   import KvpData from '@/components/KvpData.vue'
   import { computed, watch } from 'vue'
   import type { ComputedRef } from 'vue'
-  import { useMsal } from 'msal-vue'
+  import { useMsal } from 'vue-auth-msal'
   import { useGraphWithMsal } from '@/composables/useGraphWithMsal'
   import { convertToKvpDataList, type KvpDataList } from '@/helpers/kvpUtils'
   import { protectedResources } from '@/authConfig'

@@ -1,1 +1,1 @@
-# Contributing to `msal-vue` Vue Plugin library
+# Contributing to `vue-auth-msal` Vue Plugin library

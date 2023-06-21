@@ -1,7 +1,7 @@
 {
-  "name": "msal-vue",
-  "version": "1.0.0",
-  "description": "Microsoft Authentication Library for Vue.js",
+  "name": "vue-auth-msal",
+  "version": "0.0.1",
+  "description": "Vue Plugin library for MSAL.JS (Microsoft Authentication Library for JS) - Support Vue.js 3.x or later",
   "keywords": [
     "vue",
     "plugin",
@@ -13,15 +13,14 @@
     "identity",
     "social",
     "token",
+    "sso",
     "azure",
     "active",
     "directory",
     "aad",
     "b2c",
     "aadb2c",
-    "composition",
-    "api",
-    "setup",
+    "msal",
     "typescript",
     "ts"
   ],
@@ -35,37 +34,39 @@
     "type": "git",
     "url": "https://github.com/shigeyf/msal-vue.git"
   },
-  "homepage": "https://github.com/shigeyf/msal-vue",
+  "homepage": "https://github.com/shigeyf/msal-vue#readme",
   "bugs": {
     "url": "https://github.com/shigeyf/msal-vue/issues"
   },
   "main": "index.js",
-  "module": "./dist/msal-vue.mjs",
-  "types": "./dist/msal-vue.d.ts",
-  "typings": "./dist/msal-vue.d.ts",
-  "unpkg": "./dist/msal-vue.global.min.js",
-  "jsdelivr": "./dist/msal-vue.global.min.js",
+  "module": "./dist/vue-auth-msal.mjs",
+  "types": "./dist/vue-auth-msal.d.ts",
+  "typings": "./dist/vue-auth-msal.d.ts",
+  "unpkg": "./dist/vue-auth-msal.global.min.js",
+  "jsdelivr": "./dist/vue-auth-msal.global.min.js",
   "exports": {
     ".": {
-      "types": "./dist/msal-vue.d.ts",
+      "types": "./dist/vue-auth-msal.d.ts",
       "node": {
         "import": {
-          "production": "./dist/msal-vue.min.mjs",
-          "development": "./dist/msal-vue.mjs",
-          "default": "./dist/msal-vue.mjs"
+          "production": "./dist/vue-auth-msal.min.mjs",
+          "development": "./dist/vue-auth-msal.mjs",
+          "default": "./dist/vue-auth-msal.mjs"
         },
         "require": {
-          "production": "./dist/msal-vue.min.cjs",
-          "development": "./dist/msal-vue.cjs",
+          "production": "./dist/vue-auth-msal.min.cjs",
+          "development": "./dist/vue-auth-msal.cjs",
           "default": "./index.js"
         }
       },
-      "import": "./dist/msal-vue.mjs",
+      "import": "./dist/vue-auth-msal.mjs",
       "require": "./index.js"
-    },
-    "./package.json": "./package.json",
-    "./dist/*": "./dist/*"
+    }
   },
+  "files": [
+    "index.js",
+    "dist/*"
+  ],
   "scripts": {
     "build": "run-s clean build:rollup build:dts",
     "build:rollup": "cross-env NODE_NO_WARNINGS=1 rollup -c ./rollup.config.mjs",

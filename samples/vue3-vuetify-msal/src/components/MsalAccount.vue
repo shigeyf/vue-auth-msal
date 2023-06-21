@@ -3,7 +3,7 @@
 <script lang="ts" setup>
   import KvpData from '@/components/KvpData.vue'
   import { type ComputedRef, computed } from 'vue'
-  import { useAccount } from 'msal-vue'
+  import { useAccount } from 'vue-auth-msal'
   import { convertToKvpDataList, type KvpDataList } from '@/helpers/kvpUtils'
 
   const { account } = useAccount()

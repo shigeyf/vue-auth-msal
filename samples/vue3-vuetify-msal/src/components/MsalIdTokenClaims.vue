@@ -3,7 +3,7 @@
 <script lang="ts" setup>
   import IdTokenData from '@/components/IdTokenData.vue'
   import { type ComputedRef, computed } from 'vue'
-  import { useAccount } from 'msal-vue'
+  import { useAccount } from 'vue-auth-msal'
   import { createClaimsArray, type ClaimDataList } from '@/helpers/claimUtils'
 
   const { account } = useAccount()
