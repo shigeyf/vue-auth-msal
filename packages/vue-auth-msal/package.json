@@ -32,11 +32,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shigeyf/msal-vue.git"
+    "url": "https://github.com/shigeyf/vue-auth-msal.git"
   },
-  "homepage": "https://github.com/shigeyf/msal-vue#readme",
+  "homepage": "https://github.com/shigeyf/vue-auth-msal#readme",
   "bugs": {
-    "url": "https://github.com/shigeyf/msal-vue/issues"
+    "url": "https://github.com/shigeyf/vue-auth-msal/issues"
   },
   "main": "index.js",
   "module": "./dist/vue-auth-msal.mjs",

@@ -1,7 +1,7 @@
 # Microsoft Authentication Library plugin for Vue 3.x (vue-auth-msal)
 
-| [Getting Started](https://github.com/shigeyf/msal-vue/tree/main/docs/getting-started.md) | [Azure AD docs](https://aka.ms/aaddevv2) | [Sample apps](https://github.com/shigeyf/msal-vue/tree/main/samples) |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------- |
+| [Getting Started](https://github.com/shigeyf/vue-auth-msal/tree/main/docs/getting-started.md) | [Azure AD docs](https://aka.ms/aaddevv2) | [Sample apps](https://github.com/shigeyf/vue-auth-msal/tree/main/samples) |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
 
 ## Table of Contents
 
@@ -84,18 +84,18 @@ app.mount('#app')
 
 ### Getting Started
 
-For more help getting started with `vue-auth-msal` please see our [Getting Started](https://github.com/shigeyf/msal-vue/tree/main/docs/getting-started.md) doc.
+For more help getting started with `vue-auth-msal` please see our [Getting Started](https://github.com/shigeyf/vue-auth-msal/tree/main/docs/getting-started.md) doc.
 
 ## Samples
 
 Our [samples directory](./samples/) contains several example apps you can spin up to see how this plugin can be used in different scenarios.
 
-- [Create Vue App (TS) Sample with Azure AD](https://github.com/shigeyf/msal-vue/tree/main/samples/vue3-vuetify-msal)
-- [Create Vue App (TS) Sample with Azure AD B2C](https://github.com/shigeyf/msal-vue/tree/main/samples/vue3-vuetify-msal-b2c)
+- [Create Vue App (TS) Sample with Azure AD](https://github.com/shigeyf/vue-auth-msal/tree/main/samples/vue3-vuetify-msal)
+- [Create Vue App (TS) Sample with Azure AD B2C](https://github.com/shigeyf/vue-auth-msal/tree/main/samples/vue3-vuetify-msal-b2c)
 
 ## Build and Test
 
-See the [`contributing.md`](https://github.com/shigeyf/msal-vue/tree/main/docs/contributing.md) file for more information.
+See the [`contributing.md`](https://github.com/shigeyf/vue-auth-msal/tree/main/docs/contributing.md) file for more information.
 
 ### Building the package locally
 
