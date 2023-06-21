@@ -1,5 +1,9 @@
 # Microsoft Authentication Library plugin for Vue 3.x (vue-auth-msal)
 
+[![npm version](https://badge.fury.io/js/vue-auth-msal.svg)](https://badge.fury.io/js/vue-auth-msal)
+[![npm downloads](https://img.shields.io/npm/dm/vue-auth-msal.svg)](https://nodei.co/npm/vue-auth-msal/)
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache2.0-blue.svg?style=flat)](LICENSE)
+
 | [Getting Started](https://github.com/shigeyf/vue-auth-msal/tree/main/docs/getting-started.md) | [Azure AD docs](https://aka.ms/aaddevv2) | [Sample apps](https://github.com/shigeyf/vue-auth-msal/tree/main/samples) |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
 
@@ -113,3 +117,5 @@ npm run build
 ## License
 
 Copyright (c) Shige Fukushima. All rights reserved. Licensed under the Apache 2.0 License.
+
+![Thank You](https://img.shields.io/badge/Thank-you-green.svg)
