@@ -18,8 +18,12 @@ export function registerRouterGuard(router: Router, msal: MsalPlugin) {
   router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     logger.verbose(`vue-router:beforeEach():Called`)
 
-    logger.verbose(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
-    logger.verbose(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
+    // Commented to fix a logging bug.
+    //logger.verbose(`vue-router:beforeEach():to = ${JSON.stringify(to)}`)
+    //logger.verbose(`vue-router:beforeEach():from = ${JSON.stringify(from)}`)
+    // the following lines are candidates for fix.
+    //logger.verbose(`vue-router:beforeEach():to = ${JSON.stringify({ path: to.path, name: to.name })}`);
+    //logger.verbose(`vue-router:beforeEach():from = ${JSON.stringify({ path: from.path, name: from.name })}`);
 
     // Block router navigation (and rendering) before masl initialization finished
     logger.verbose(`vue-router:beforeEach():Awaiting MsalPlugin Init`)
